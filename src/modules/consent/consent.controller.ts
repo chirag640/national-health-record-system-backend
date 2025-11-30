@@ -11,11 +11,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ConsentService } from './consent.service';
 import { CreateConsentDto } from './dto/create-consent.dto';
 import { UpdateConsentDto } from './dto/update-consent.dto';
 import { ConsentOutputDto } from './dto/consent-output.dto';
+import { EmergencyConsentOverrideDto } from './dto/emergency-consent-override.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -64,6 +65,77 @@ export class ConsentController {
   })
   update(@Param('id') id: string, @Body() dto: UpdateConsentDto): Promise<ConsentOutputDto> {
     return this.consentService.update(id, dto);
+  }
+
+  @Post('emergency/request-otp')
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Request OTP for emergency consent override',
+    description:
+      'Hospital admin requests OTP to approve emergency access. OTP sent to registered email/phone.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'OTP sent successfully',
+    schema: {
+      properties: {
+        message: {
+          type: 'string',
+          example: 'OTP sent to admin@hospital.com. Valid for 10 minutes.',
+        },
+        expiresAt: { type: 'string', format: 'date-time' },
+      },
+    },
+  })
+  async requestEmergencyOtp(@Body('adminId') adminId: string) {
+    return this.consentService.requestEmergencyOtp(adminId);
+  }
+
+  @Post('emergency/verify-otp')
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Verify OTP for emergency consent override',
+    description: 'Validates OTP before allowing emergency access creation.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'OTP verified successfully',
+    schema: {
+      properties: {
+        verified: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'OTP verified successfully' },
+      },
+    },
+  })
+  async verifyEmergencyOtp(@Body('adminId') adminId: string, @Body('otp') otp: string) {
+    const verified = await this.consentService.verifyEmergencyOtp(adminId, otp);
+    return {
+      verified,
+      message: 'OTP verified successfully',
+    };
+  }
+
+  @Post('emergency/override')
+  @HttpCode(HttpStatus.CREATED)
+  @Roles(UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Create emergency consent override (requires OTP verification)',
+    description:
+      'Creates temporary 1-hour consent for critical situations. Requires admin approval + OTP. ' +
+      'Workflow: 1) Request OTP, 2) Verify OTP, 3) Create override with detailed justification. ' +
+      'All emergency overrides are logged in audit trail for compliance.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Emergency consent created successfully',
+    type: ConsentOutputDto,
+  })
+  async createEmergencyOverride(
+    @Body() dto: EmergencyConsentOverrideDto,
+  ): Promise<ConsentOutputDto> {
+    return this.consentService.createEmergencyOverride(dto);
   }
 
   @Delete(':id')

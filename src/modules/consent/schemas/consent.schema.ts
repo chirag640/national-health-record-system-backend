@@ -53,6 +53,33 @@ export class Consent {
     default: true,
   })
   isActive!: boolean;
+
+  // Emergency override fields (for critical situations)
+  @Prop({
+    type: Boolean,
+    required: false,
+    default: false,
+  })
+  isEmergencyOverride?: boolean;
+
+  @Prop({
+    type: String,
+    required: false,
+  })
+  emergencyJustification?: string;
+
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    required: false,
+    ref: 'User',
+  })
+  approvedBy?: Types.ObjectId;
+
+  @Prop({
+    type: Date,
+    required: false,
+  })
+  approvedAt?: Date;
 }
 
 export const ConsentSchema = SchemaFactory.createForClass(Consent);
