@@ -23,7 +23,7 @@ import { UserRole } from '../../auth/schemas/user.schema';
 
 @ApiTags('Doctors')
 @ApiBearerAuth('JWT-auth')
-@Controller('doctors')
+@Controller({ path: 'doctors', version: '1' })
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class DoctorController {
   constructor(private readonly doctorService: DoctorService) {}

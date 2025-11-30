@@ -120,6 +120,12 @@ async function bootstrap() {
   const auditLogModel = app.get(getModelToken('AuditLog'));
   app.useGlobalInterceptors(new AuditLogInterceptor(auditLogModel));
 
+  // Register translation interceptor for multilingual error messages (English, Hindi, Gujarati)
+  const { TranslationInterceptor } = await import('./common/translation.interceptor');
+  const { I18nService } = await import('nestjs-i18n');
+  const i18nService = app.get(I18nService);
+  app.useGlobalInterceptors(new TranslationInterceptor(i18nService));
+
   // Note: Optional interceptors commented out - uncomment if implementing these features
   // const { ResponseValidationInterceptor } = await import('./common/response-validation.interceptor');
   // const { Reflector } = await import('@nestjs/core');

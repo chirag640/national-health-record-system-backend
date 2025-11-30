@@ -10,9 +10,12 @@ import {
   HttpStatus,
   Query,
   UseGuards,
+  Res,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { Response } from 'express';
 import { PatientService } from './patient.service';
+import { PatientIdCardService } from './patient-id-card.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PatientOutputDto } from './dto/patient-output.dto';
@@ -23,10 +26,13 @@ import { UserRole } from '../../auth/schemas/user.schema';
 
 @ApiTags('Patients')
 @ApiBearerAuth('JWT-auth')
-@Controller('patients')
+@Controller({ path: 'patients', version: '1' })
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class PatientController {
-  constructor(private readonly patientService: PatientService) {}
+  constructor(
+    private readonly patientService: PatientService,
+    private readonly patientIdCardService: PatientIdCardService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -79,6 +85,26 @@ export class PatientController {
   @ApiOperation({ summary: 'Update patient information' })
   update(@Param('id') id: string, @Body() dto: UpdatePatientDto): Promise<PatientOutputDto> {
     return this.patientService.update(id, dto);
+  }
+
+  @Get(':id/id-card')
+  @Roles(UserRole.PATIENT, UserRole.HOSPITAL_ADMIN, UserRole.DOCTOR, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Generate patient ID card with QR code',
+    description:
+      'Downloads a PDF ID card containing patient details and QR code for hospital verification. ' +
+      'QR code includes GUID and verification URL. Card size: 85.6mm x 53.98mm (credit card size).',
+  })
+  async generateIdCard(@Param('id') id: string, @Res() res: Response): Promise<void> {
+    const pdfBuffer = await this.patientIdCardService.generateIdCard(id);
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename=patient-id-card-${id}.pdf`,
+      'Content-Length': pdfBuffer.length,
+    });
+
+    res.send(pdfBuffer);
   }
 
   @Delete(':id')

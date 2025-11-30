@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
+import * as path from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerModule } from './modules/logger/logger.module';
@@ -35,6 +37,18 @@ import { AuditLogModule } from './modules/audit-log/audit-log.module';
       heartbeatFrequencyMS: 10000, // Check server health every 10s
       retryWrites: true, // Automatically retry write operations
       retryReads: true, // Automatically retry read operations
+    }),
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: path.join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [
+        { use: QueryResolver, options: ['lang'] }, // ?lang=hi
+        AcceptLanguageResolver, // Accept-Language: hi
+        new HeaderResolver(['x-custom-lang']), // x-custom-lang: hi
+      ],
     }),
     LoggerModule,
     CacheModule,

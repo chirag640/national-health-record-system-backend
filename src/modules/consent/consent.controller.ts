@@ -23,7 +23,7 @@ import { UserRole } from '../../auth/schemas/user.schema';
 
 @ApiTags('Consents')
 @ApiBearerAuth('JWT-auth')
-@Controller('consents')
+@Controller({ path: 'consents', version: '1' })
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ConsentController {
   constructor(private readonly consentService: ConsentService) {}

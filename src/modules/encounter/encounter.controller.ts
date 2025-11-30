@@ -24,7 +24,7 @@ import { UserRole } from '../../auth/schemas/user.schema';
 
 @ApiTags('Encounters')
 @ApiBearerAuth('JWT-auth')
-@Controller('encounters')
+@Controller({ path: 'encounters', version: '1' })
 @UseGuards(JwtAuthGuard, RolesGuard, ConsentGuard)
 export class EncounterController {
   constructor(private readonly encounterService: EncounterService) {}
