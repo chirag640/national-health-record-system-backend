@@ -50,6 +50,26 @@ export class DoctorRepository extends BaseRepository<DoctorDocument> {
   }
 
   /**
+   * Advanced search with custom query
+   */
+  async search(query: any, skip: number = 0, limit: number = 10): Promise<Doctor[]> {
+    return this.doctorModel
+      .find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec() as Promise<Doctor[]>;
+  }
+
+  /**
+   * Count documents matching query
+   */
+  async countByQuery(query: any): Promise<number> {
+    return this.doctorModel.countDocuments(query).exec();
+  }
+
+  /**
    * Relationship Management Methods
    */
 }

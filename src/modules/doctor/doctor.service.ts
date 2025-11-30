@@ -34,6 +34,65 @@ export class DoctorService {
     return createPaginatedResponse(data, total, currentPage, itemsPerPage);
   }
 
+  /**
+   * Find doctors by hospital
+   */
+  async findByHospital(
+    hospitalId: string,
+    page?: number,
+    limit?: number,
+  ): Promise<PaginatedResponse<DoctorOutputDto>> {
+    const currentPage = Math.max(1, Number(page) || 1);
+    const itemsPerPage = Math.min(100, Math.max(1, Number(limit) || 10));
+    const skip = (currentPage - 1) * itemsPerPage;
+
+    const query = { hospitalId: new Types.ObjectId(hospitalId), isActive: true };
+
+    const [items, total] = await Promise.all([
+      this.doctorRepository.search(query, skip, itemsPerPage),
+      this.doctorRepository.countByQuery(query),
+    ]);
+
+    const data = items.map((item) => this.mapToOutput(item));
+    return createPaginatedResponse(data, total, currentPage, itemsPerPage);
+  }
+
+  /**
+   * Search doctors by specialization, name, or license number
+   */
+  async search(
+    searchTerm: string,
+    hospitalId?: string,
+    page?: number,
+    limit?: number,
+  ): Promise<PaginatedResponse<DoctorOutputDto>> {
+    const currentPage = Math.max(1, Number(page) || 1);
+    const itemsPerPage = Math.min(100, Math.max(1, Number(limit) || 10));
+    const skip = (currentPage - 1) * itemsPerPage;
+
+    const query: any = {
+      $or: [
+        { fullName: { $regex: searchTerm, $options: 'i' } },
+        { specialization: { $regex: searchTerm, $options: 'i' } },
+        { licenseNumber: { $regex: searchTerm, $options: 'i' } },
+      ],
+      isActive: true,
+    };
+
+    // Filter by hospital if provided
+    if (hospitalId) {
+      query.hospitalId = new Types.ObjectId(hospitalId);
+    }
+
+    const [items, total] = await Promise.all([
+      this.doctorRepository.search(query, skip, itemsPerPage),
+      this.doctorRepository.countByQuery(query),
+    ]);
+
+    const data = items.map((item) => this.mapToOutput(item));
+    return createPaginatedResponse(data, total, currentPage, itemsPerPage);
+  }
+
   async findOne(id: string): Promise<DoctorOutputDto> {
     const item = await this.doctorRepository.findById(id);
     if (!item) {

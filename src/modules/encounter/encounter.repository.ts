@@ -50,6 +50,26 @@ export class EncounterRepository extends BaseRepository<EncounterDocument> {
   }
 
   /**
+   * Advanced search with custom query
+   */
+  async search(query: any, skip: number = 0, limit: number = 10): Promise<Encounter[]> {
+    return this.encounterModel
+      .find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec() as Promise<Encounter[]>;
+  }
+
+  /**
+   * Count documents matching query
+   */
+  async countByQuery(query: any): Promise<number> {
+    return this.encounterModel.countDocuments(query).exec();
+  }
+
+  /**
    * Relationship Management Methods
    */
 }

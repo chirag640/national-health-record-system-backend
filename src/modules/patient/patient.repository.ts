@@ -54,6 +54,26 @@ export class PatientRepository extends BaseRepository<PatientDocument> {
   }
 
   /**
+   * Advanced search with custom query
+   */
+  async search(query: any, skip: number = 0, limit: number = 10): Promise<Patient[]> {
+    return this.patientModel
+      .find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec() as Promise<Patient[]>;
+  }
+
+  /**
+   * Count documents matching query
+   */
+  async countByQuery(query: any): Promise<number> {
+    return this.patientModel.countDocuments(query).exec();
+  }
+
+  /**
    * Relationship Management Methods
    */
 }

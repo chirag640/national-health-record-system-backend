@@ -48,6 +48,47 @@ export class EncounterController {
     return this.encounterService.findAll(page, limit);
   }
 
+  @Get('patient/:patientId')
+  @Roles(UserRole.PATIENT, UserRole.DOCTOR, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Find encounters by patient',
+    description: 'Patient can view own encounters. Doctor requires consent.',
+  })
+  findByPatient(
+    @Param('patientId') patientId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.encounterService.findByPatient(patientId, page, limit);
+  }
+
+  @Get('search/advanced')
+  @Roles(UserRole.DOCTOR, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Advanced encounter search',
+    description: 'Search encounters by patient, doctor, hospital, date range, or diagnosis',
+  })
+  search(
+    @Query('patientId') patientId?: string,
+    @Query('doctorId') doctorId?: string,
+    @Query('hospitalId') hospitalId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('diagnosis') diagnosis?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    const filters = {
+      patientId,
+      doctorId,
+      hospitalId,
+      diagnosis,
+      startDate: startDate ? new Date(startDate) : undefined,
+      endDate: endDate ? new Date(endDate) : undefined,
+    };
+    return this.encounterService.search(filters, page, limit);
+  }
+
   @Get(':id')
   @Roles(UserRole.PATIENT, UserRole.DOCTOR, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
   @ApiOperation({

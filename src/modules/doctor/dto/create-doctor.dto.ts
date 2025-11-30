@@ -79,22 +79,28 @@ export class CreateDoctorDto {
   specialization?: string;
 
   @ApiProperty({
-    description: 'Medical License Number',
-    example: 'MED-12345',
+    description:
+      'Medical License Number - Format: State Code (2 letters) + Number (5-10 digits) e.g., MH-12345 or DL-123456789',
+    example: 'MH-123456',
     required: false,
     minLength: 1,
     maxLength: 100,
+    pattern: '^[A-Z]{2}-\\d{5,10}$',
   })
   @IsOptional()
   @Transform(({ value }) => {
     if (value === 'null' || value === 'undefined' || value === '') return undefined;
     if (!value) return value;
-    const trimmed = value.trim();
+    const trimmed = value.trim().toUpperCase(); // Normalize to uppercase
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
   })
   @IsString()
-  @MinLength(1)
-  @MaxLength(100)
+  @MinLength(8) // Minimum: XX-12345 (8 chars)
+  @MaxLength(13) // Maximum: XX-1234567890 (13 chars)
+  @Matches(/^[A-Z]{2}-\d{5,10}$/, {
+    message:
+      'License number must follow format: 2 uppercase letters, hyphen, then 5-10 digits (e.g., MH-123456 or DL-1234567890)',
+  })
   licenseNumber?: string;
 
   @ApiProperty({

@@ -46,6 +46,48 @@ export class PatientService {
     return createPaginatedResponse(data, total, currentPage, itemsPerPage);
   }
 
+  /**
+   * Advanced patient search by GUID, name, or phone
+   * Supports partial matching and case-insensitive search
+   */
+  async search(
+    searchTerm: string,
+    page?: number,
+    limit?: number,
+  ): Promise<PaginatedResponse<PatientOutputDto>> {
+    const currentPage = Math.max(1, Number(page) || 1);
+    const itemsPerPage = Math.min(100, Math.max(1, Number(limit) || 10));
+    const skip = (currentPage - 1) * itemsPerPage;
+
+    // Build search query - search across multiple fields
+    const searchQuery = {
+      $or: [
+        { guid: { $regex: searchTerm, $options: 'i' } },
+        { fullName: { $regex: searchTerm, $options: 'i' } },
+        { phone: { $regex: searchTerm, $options: 'i' } },
+      ],
+    };
+
+    const [items, total] = await Promise.all([
+      this.patientRepository.search(searchQuery, skip, itemsPerPage),
+      this.patientRepository.countByQuery(searchQuery),
+    ]);
+
+    const data = items.map((item) => this.mapToOutput(item));
+    return createPaginatedResponse(data, total, currentPage, itemsPerPage);
+  }
+
+  /**
+   * Find patient by GUID (exact match)
+   */
+  async findByGuid(guid: string): Promise<PatientOutputDto> {
+    const item = await this.patientRepository.findByGuid(guid);
+    if (!item) {
+      throw new NotFoundException(`Patient with GUID ${guid} not found`);
+    }
+    return this.mapToOutput(item);
+  }
+
   async findOne(id: string): Promise<PatientOutputDto> {
     const item = await this.patientRepository.findById(id);
     if (!item) {

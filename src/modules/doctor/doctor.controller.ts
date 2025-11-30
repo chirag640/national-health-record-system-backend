@@ -43,6 +43,36 @@ export class DoctorController {
     return this.doctorService.findAll(page, limit);
   }
 
+  @Get('hospital/:hospitalId')
+  @Roles(UserRole.HOSPITAL_ADMIN, UserRole.DOCTOR, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Find doctors by hospital',
+    description: 'Get all active doctors at a specific hospital',
+  })
+  findByHospital(
+    @Param('hospitalId') hospitalId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.doctorService.findByHospital(hospitalId, page, limit);
+  }
+
+  @Get('search/:searchTerm')
+  @Roles(UserRole.HOSPITAL_ADMIN, UserRole.DOCTOR, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Search doctors by specialization, name, or license',
+    description:
+      'Partial match search across name, specialization, and license number. Optionally filter by hospital.',
+  })
+  search(
+    @Param('searchTerm') searchTerm: string,
+    @Query('hospitalId') hospitalId?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.doctorService.search(searchTerm, hospitalId, page, limit);
+  }
+
   @Get(':id')
   @Roles(UserRole.HOSPITAL_ADMIN, UserRole.DOCTOR, UserRole.SUPER_ADMIN)
   @ApiOperation({ summary: 'Get doctor details' })
