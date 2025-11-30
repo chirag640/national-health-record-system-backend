@@ -99,7 +99,13 @@ export class AuditLogInterceptor implements NestInterceptor {
       await this.auditLogModel.create(data);
     } catch (error) {
       // Never let audit logging failure break the request
-      this.logger.error(`Failed to create audit log: ${error.message}`);
+      const message =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+          ? error
+          : JSON.stringify(error);
+      this.logger.error(`Failed to create audit log: ${message}`);
     }
   }
 

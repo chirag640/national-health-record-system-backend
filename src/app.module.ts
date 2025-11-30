@@ -22,6 +22,7 @@ import { EncounterModule } from './modules/encounter/encounter.module';
 import { HealthDocumentModule } from './modules/health-document/health-document.module';
 import { ConsentModule } from './modules/consent/consent.module';
 import { AuditLogModule } from './modules/audit-log/audit-log.module';
+import { SyncModule } from './modules/sync/sync.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { AuditLogModule } from './modules/audit-log/audit-log.module';
     HealthDocumentModule,
     ConsentModule,
     AuditLogModule,
+    SyncModule, // Offline sync for rural hospitals
   ],
   controllers: [AppController],
   providers: [AppService],
