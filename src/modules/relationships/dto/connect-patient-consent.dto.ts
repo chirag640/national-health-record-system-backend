@@ -1,0 +1,21 @@
+import { IsMongoId, IsArray, ArrayNotEmpty } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class ConnectPatientConsentDto {
+  @ApiProperty({
+    description: 'ID of the Patient record',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @IsMongoId()
+  patientId!: string;
+
+  @ApiProperty({
+    description: 'Array of Consent IDs to connect',
+    example: ['507f1f77bcf86cd799439012', '507f1f77bcf86cd799439013'],
+    type: [String],
+  })
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsMongoId({ each: true })
+  consentIds!: string[];
+}

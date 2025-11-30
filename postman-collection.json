@@ -1,0 +1,583 @@
+{
+  "info": {
+    "name": "national-health-record-system API",
+    "description": "Patient-centric EHR platform for patients, doctors, and government hospitals with consent control, secure document storage, offline sync, and audit logging.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    }  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
+                  "    console.log('🔐 Tokens saved to collection variables');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"email\": \"admin@national-health-record-system.com\",\\n  \"password\": \"Admin@123456\"\\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"email\": \"user@example.com\",\\n  \"password\": \"SecurePass123!\"\\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "    console.log('🔄 Access token refreshed');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"refreshToken\": \"{{refreshToken}}\"\\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/refresh"
+          }
+        }
+      ]
+    },
+    {
+      "name": "patients",
+      "item": [
+        {
+          "name": "Create Patient",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"guid\": \"guid value\",\n  \"fullName\": \"Sample fullName\",\n  \"phone\": \"phone value\",\n  \"gender\": null,\n  \"dateOfBirth\": \"2024-01-01T00:00:00.000Z\",\n  \"address\": {},\n  \"allergies\": [\"item1\", \"item2\"],\n  \"chronicDiseases\": [\"item1\", \"item2\"],\n  \"bloodGroup\": \"bloodGroup value\",\n  \"emergencyContact\": {},\n  \"hasSmartphone\": true,\n  \"idCardIssued\": true\n}"
+            },
+            "url": "{{baseUrl}}/patients"
+          }
+        },
+        {
+          "name": "Get All patients",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/patients?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Patient by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/patients/:id"
+          }
+        },
+        {
+          "name": "Update Patient",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"name\": \"Updated value\"\\n}"
+            },
+            "url": "{{baseUrl}}/patients/:id"
+          }
+        },
+        {
+          "name": "Delete Patient",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/patients/:id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "hospitals",
+      "item": [
+        {
+          "name": "Create Hospital",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample name\",\n  \"state\": \"state value\",\n  \"district\": \"district value\",\n  \"hospitalType\": null,\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/hospitals"
+          }
+        },
+        {
+          "name": "Get All hospitals",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/hospitals?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["hospitals"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Hospital by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/hospitals/:id"
+          }
+        },
+        {
+          "name": "Update Hospital",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"name\": \"Updated value\"\\n}"
+            },
+            "url": "{{baseUrl}}/hospitals/:id"
+          }
+        },
+        {
+          "name": "Delete Hospital",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/hospitals/:id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "doctors",
+      "item": [
+        {
+          "name": "Create Doctor",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Sample fullName\",\n  \"phone\": \"phone value\",\n  \"specialization\": \"specialization value\"\n}"
+            },
+            "url": "{{baseUrl}}/doctors"
+          }
+        },
+        {
+          "name": "Get All doctors",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/doctors?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Doctor by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/doctors/:id"
+          }
+        },
+        {
+          "name": "Update Doctor",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"name\": \"Updated value\"\\n}"
+            },
+            "url": "{{baseUrl}}/doctors/:id"
+          }
+        },
+        {
+          "name": "Delete Doctor",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/doctors/:id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "encounters",
+      "item": [
+        {
+          "name": "Create Encounter",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitReason\": \"visitReason value\",\n  \"diagnosis\": \"diagnosis value\",\n  \"prescriptions\": {},\n  \"vitals\": {}\n}"
+            },
+            "url": "{{baseUrl}}/encounters"
+          }
+        },
+        {
+          "name": "Get All encounters",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/encounters?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["encounters"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Encounter by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/encounters/:id"
+          }
+        },
+        {
+          "name": "Update Encounter",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"name\": \"Updated value\"\\n}"
+            },
+            "url": "{{baseUrl}}/encounters/:id"
+          }
+        },
+        {
+          "name": "Delete Encounter",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/encounters/:id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "healthdocuments",
+      "item": [
+        {
+          "name": "Create HealthDocument",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"docType\": \"docType value\",\n  \"fileUrl\": \"fileUrl value\",\n  \"metadata\": {}\n}"
+            },
+            "url": "{{baseUrl}}/healthdocuments"
+          }
+        },
+        {
+          "name": "Get All healthdocuments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/healthdocuments?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["healthdocuments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get HealthDocument by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/healthdocuments/:id"
+          }
+        },
+        {
+          "name": "Update HealthDocument",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"name\": \"Updated value\"\\n}"
+            },
+            "url": "{{baseUrl}}/healthdocuments/:id"
+          }
+        },
+        {
+          "name": "Delete HealthDocument",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/healthdocuments/:id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "consents",
+      "item": [
+        {
+          "name": "Create Consent",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scope\": [\"item1\", \"item2\"],\n  \"expiresAt\": \"2024-01-01T00:00:00.000Z\"\n}"
+            },
+            "url": "{{baseUrl}}/consents"
+          }
+        },
+        {
+          "name": "Get All consents",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/consents?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["consents"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Consent by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/consents/:id"
+          }
+        },
+        {
+          "name": "Update Consent",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"name\": \"Updated value\"\\n}"
+            },
+            "url": "{{baseUrl}}/consents/:id"
+          }
+        },
+        {
+          "name": "Delete Consent",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/consents/:id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "auditlogs",
+      "item": [
+        {
+          "name": "Create AuditLog",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"userId value\",\n  \"action\": \"action value\",\n  \"resource\": \"resource value\",\n  \"resourceId\": \"resourceId value\",\n  \"ipAddress\": \"ipAddress value\",\n  \"details\": {}\n}"
+            },
+            "url": "{{baseUrl}}/auditlogs"
+          }
+        },
+        {
+          "name": "Get All auditlogs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/auditlogs?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["auditlogs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get AuditLog by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/auditlogs/:id"
+          }
+        },
+        {
+          "name": "Update AuditLog",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"name\": \"Updated value\"\\n}"
+            },
+            "url": "{{baseUrl}}/auditlogs/:id"
+          }
+        },
+        {
+          "name": "Delete AuditLog",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/auditlogs/:id"
+          }
+        }
+      ]
+    }  ]
+}

@@ -1,0 +1,118 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: national-health-record-system-app
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=mongodb://mongo:27017/national-health-record-system
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
+      - JWT_ACCESS_EXPIRY=${JWT_ACCESS_EXPIRY:-15m}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - QUEUE_REDIS_URL=${QUEUE_REDIS_URL:-redis://redis-queue:6379/1}
+      - QUEUE_NOTIFICATION_CONCURRENCY=${QUEUE_NOTIFICATION_CONCURRENCY:-5}
+      - QUEUE_DOCUMENT_CONCURRENCY=${QUEUE_DOCUMENT_CONCURRENCY:-3}
+      - QUEUE_SYNC_CONCURRENCY=${QUEUE_SYNC_CONCURRENCY:-2}
+      - QUEUE_ANALYTICS_CONCURRENCY=${QUEUE_ANALYTICS_CONCURRENCY:-1}
+      - QUEUE_CLEANUP_CONCURRENCY=${QUEUE_CLEANUP_CONCURRENCY:-1}
+    depends_on:
+      - mongo
+      - redis
+      - redis-queue
+    volumes:
+      # Mount only source code directories, exclude build artifacts
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./nest-cli.json:/app/nest-cli.json
+      # Preserve node_modules and dist inside container
+      - /app/node_modules
+      - /app/dist
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:6
+    container_name: national-health-record-system-mongo
+    restart: always
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: national-health-record-system-redis
+    restart: always
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  redis-queue:
+    image: redis:7-alpine
+    container_name: national-health-record-system-redis-queue
+    restart: always
+    ports:
+      - "${QUEUE_REDIS_PORT:-6380}:6379"
+    volumes:
+      - redis-queue-data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # Optional: Dedicated Queue Worker (for production scaling)
+  # Uncomment to run worker as separate process
+  # worker:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: national-health-record-system-worker
+  #   command: npm run worker:start
+  #   environment:
+  #     - NODE_ENV=production
+  #     - QUEUE_REDIS_URL=redis://redis-queue:6379/1
+  #     - DATABASE_URL=mongodb://mongo:27017/national-health-record-system
+  #   depends_on:
+  #     - redis-queue
+  #     - mongo
+  #   networks:
+  #     - app-network
+  #   restart: unless-stopped
+  #   deploy:
+  #     replicas: 1  # Scale workers by increasing this number
+
+volumes:
+  mongo-data:
+  redis-data:
+  redis-queue-data:
+
+networks:
+  app-network:
+    driver: bridge

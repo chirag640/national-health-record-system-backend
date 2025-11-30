@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    // Strict mode options for production-ready code
+    "strict": true, // Enable all strict type-checking options
+    "strictNullChecks": true, // Disallow null/undefined in type checking
+    "noImplicitAny": true, // Error on expressions with implied 'any' type
+    "strictBindCallApply": true, // Check 'bind', 'call', and 'apply' methods
+    "strictPropertyInitialization": true, // Ensure class properties are initialized
+    "forceConsistentCasingInFileNames": true, // Prevent case-sensitive import issues
+    "noFallthroughCasesInSwitch": true, // Prevent fallthrough cases in switch
+    "noUnusedLocals": true, // Error on unused local variables
+    "noUnusedParameters": true, // Error on unused function parameters
+    "noImplicitReturns": true, // Ensure all code paths return a value
+    "noUncheckedIndexedAccess": true // Add undefined to unindexed property access
+  }
+}

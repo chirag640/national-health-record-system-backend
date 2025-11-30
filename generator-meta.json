@@ -1,0 +1,69 @@
+{
+  "generator": {
+    "name": "FoundationWizard",
+    "version": "1.0.0",
+    "timestamp": "2025-11-30T14:41:07.853Z"
+  },
+  "project": {
+    "name": "national-health-record-system",
+    "description": "Patient-centric EHR platform for patients, doctors, and government hospitals with consent control, secure document storage, offline sync, and audit logging.",
+    "orm": "mongoose"
+  },
+  "dependencies": {
+    "nodejs": "20",
+    "nestjs": "11.0.0"
+  },
+  "features": {
+    "authentication": true,
+    "jwt": true,
+    "rbac": true,
+    "oauth": false,
+    "swagger": true,
+    "logging": true,
+    "caching": true,
+    "rateLimit": true,
+    "health": true,
+    "compression": true,
+    "helmet": true,
+    "docker": true,
+    "cicd": true
+  },
+  "models": [
+    {
+      "name": "Patient",
+      "fields": 12,
+      "timestamps": true
+    },
+    {
+      "name": "Hospital",
+      "fields": 5,
+      "timestamps": true
+    },
+    {
+      "name": "Doctor",
+      "fields": 3,
+      "timestamps": true
+    },
+    {
+      "name": "Encounter",
+      "fields": 4,
+      "timestamps": true
+    },
+    {
+      "name": "HealthDocument",
+      "fields": 3,
+      "timestamps": true
+    },
+    {
+      "name": "Consent",
+      "fields": 2,
+      "timestamps": true
+    },
+    {
+      "name": "AuditLog",
+      "fields": 6,
+      "timestamps": true
+    }
+  ],
+  "relationships": 9
+}
