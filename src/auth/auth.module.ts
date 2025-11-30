@@ -8,11 +8,13 @@ import { AuthService } from './auth.service';
 import { OtpService } from './otp.service';
 import { SessionService } from './session.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { ConsentGuard } from './guards/consent.guard';
 import { User, UserSchema } from './schemas/user.schema';
 import { Otp, OtpSchema } from './schemas/otp.schema';
 import { Session, SessionSchema } from './schemas/session.schema';
 import { EmailModule } from '../email/email.module';
 import { Doctor, DoctorSchema } from '../modules/doctor/schemas/doctor.schema';
+import { Consent, ConsentSchema } from '../modules/consent/schemas/consent.schema';
 
 @Module({
   imports: [
@@ -21,6 +23,7 @@ import { Doctor, DoctorSchema } from '../modules/doctor/schemas/doctor.schema';
       { name: Otp.name, schema: OtpSchema },
       { name: Session.name, schema: SessionSchema },
       { name: Doctor.name, schema: DoctorSchema },
+      { name: Consent.name, schema: ConsentSchema },
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
@@ -36,7 +39,15 @@ import { Doctor, DoctorSchema } from '../modules/doctor/schemas/doctor.schema';
     EmailModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, OtpService, SessionService, JwtStrategy],
-  exports: [AuthService, OtpService, SessionService, JwtStrategy, PassportModule, JwtModule],
+  providers: [AuthService, OtpService, SessionService, JwtStrategy, ConsentGuard],
+  exports: [
+    AuthService,
+    OtpService,
+    SessionService,
+    JwtStrategy,
+    ConsentGuard,
+    PassportModule,
+    JwtModule,
+  ],
 })
 export class AuthModule {}

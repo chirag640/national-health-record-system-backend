@@ -4,13 +4,30 @@ import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PatientOutputDto } from './dto/patient-output.dto';
 import { PaginatedResponse, createPaginatedResponse } from '../../pagination.dto';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class PatientService {
   constructor(private readonly patientRepository: PatientRepository) {}
 
+  /**
+   * Generate unique GUID for patient
+   * Format: NHRS-YYYY-XXXXXXXX (e.g., NHRS-2025-A3B4C5D6)
+   */
+  private generateGUID(): string {
+    const year = new Date().getFullYear();
+    const randomHex = crypto.randomBytes(4).toString('hex').toUpperCase();
+    return `NHRS-${year}-${randomHex}`;
+  }
+
   async create(dto: CreatePatientDto): Promise<PatientOutputDto> {
-    const created = await this.patientRepository.create(dto);
+    // Auto-generate GUID if not provided
+    const patientData = {
+      ...dto,
+      guid: dto.guid || this.generateGUID(),
+    };
+
+    const created = await this.patientRepository.create(patientData);
     return this.mapToOutput(created);
   }
 

@@ -114,6 +114,12 @@ async function bootstrap() {
   const { LoggingInterceptor } = await import('./common/logging.interceptor');
   app.useGlobalInterceptors(new LoggingInterceptor());
 
+  // Register audit logging interceptor for legal compliance (tracks all data access)
+  const { AuditLogInterceptor } = await import('./common/audit-log.interceptor');
+  const { getModelToken } = await import('@nestjs/mongoose');
+  const auditLogModel = app.get(getModelToken('AuditLog'));
+  app.useGlobalInterceptors(new AuditLogInterceptor(auditLogModel));
+
   // Note: Optional interceptors commented out - uncomment if implementing these features
   // const { ResponseValidationInterceptor } = await import('./common/response-validation.interceptor');
   // const { Reflector } = await import('@nestjs/core');
