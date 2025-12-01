@@ -38,7 +38,6 @@ export class Otp {
   @Prop({
     type: Date,
     required: true,
-    index: true,
   })
   expiresAt!: Date;
 

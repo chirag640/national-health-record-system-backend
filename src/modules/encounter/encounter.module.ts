@@ -5,10 +5,14 @@ import { EncounterController } from './encounter.controller';
 import { EncounterService } from './encounter.service';
 import { EncounterRepository } from './encounter.repository';
 import { AuthModule } from '../../auth/auth.module';
+import { Consent, ConsentSchema } from '../consent/schemas/consent.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Encounter.name, schema: EncounterSchema }]),
+    MongooseModule.forFeature([
+      { name: Encounter.name, schema: EncounterSchema },
+      { name: Consent.name, schema: ConsentSchema },
+    ]),
     AuthModule,
   ],
   controllers: [EncounterController],

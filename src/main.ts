@@ -124,7 +124,7 @@ async function bootstrap() {
   const { TranslationInterceptor } = await import('./common/translation.interceptor');
   const { I18nService } = await import('nestjs-i18n');
   const i18nService = app.get(I18nService);
-  app.useGlobalInterceptors(new TranslationInterceptor(i18nService));
+  app.useGlobalInterceptors(new TranslationInterceptor(i18nService as any));
 
   // Note: Optional interceptors commented out - uncomment if implementing these features
   // const { ResponseValidationInterceptor } = await import('./common/response-validation.interceptor');

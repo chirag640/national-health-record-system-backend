@@ -72,7 +72,18 @@ export const EnvSchema = z.object({
     .transform((val) => val === 'true'),
   SMTP_USER: z.string().email('SMTP_USER must be a valid email').min(1, 'SMTP_USER is required'),
   SMTP_PASSWORD: z.string().min(1, 'SMTP_PASSWORD (App Password) is required'),
-  EMAIL_FROM: z.string().email().optional(),
+  EMAIL_FROM: z
+    .string()
+    .min(1, 'EMAIL_FROM is required')
+    .refine(
+      (val) => {
+        // Accept both formats: "email@example.com" or "Name <email@example.com>"
+        const plainEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const rfc5322 = /^.+\s*<[^\s@]+@[^\s@]+\.[^\s@]+>$/;
+        return plainEmail.test(val) || rfc5322.test(val);
+      },
+      { message: 'EMAIL_FROM must be a valid email or format: "Name <email@example.com>"' },
+    ),
   FRONTEND_URL: z.string().url().default('http://localhost:3000'),
 
   // AWS S3 Configuration (optional, for document storage)

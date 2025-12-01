@@ -121,7 +121,7 @@ export class EncounterService {
 
     // Check if encounter is older than 24 hours
     const now = new Date();
-    const encounterCreated = new Date(encounter.createdAt);
+    const encounterCreated = new Date((encounter as any).createdAt);
     const hoursSinceCreation = (now.getTime() - encounterCreated.getTime()) / (1000 * 60 * 60);
 
     if (hoursSinceCreation > 24) {
@@ -130,7 +130,7 @@ export class EncounterService {
         message: 'Cannot modify encounter. Edit window has expired (24 hours after creation).',
         details: {
           encounterId: id,
-          createdAt: encounter.createdAt,
+          createdAt: (encounter as any).createdAt,
           hoursSinceCreation: Math.floor(hoursSinceCreation),
           editWindowHours: 24,
           action: 'Contact hospital administrator for corrections.',

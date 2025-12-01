@@ -36,7 +36,6 @@ export class Session {
   @Prop({
     type: Date,
     required: true,
-    index: true,
   })
   expiresAt!: Date;
 

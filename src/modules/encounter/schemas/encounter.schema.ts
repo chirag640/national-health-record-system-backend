@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document as MongooseDocument, Schema as MongooseSchema, Types } from 'mongoose';
-import { softDeletePlugin } from '../../../common/soft-delete.plugin';
+import { addSoftDeletePlugin } from '../../../common/soft-delete.plugin';
 
 export type EncounterDocument = Encounter & MongooseDocument;
 
@@ -65,7 +65,7 @@ export const EncounterSchema = SchemaFactory.createForClass(Encounter);
 
 // Apply soft delete plugin to prevent permanent deletion (legal compliance)
 // Encounters cannot be hard deleted - only marked as deleted with deletedAt timestamp
-EncounterSchema.plugin(softDeletePlugin);
+addSoftDeletePlugin(EncounterSchema);
 
 // Compound indexes for common query patterns
 // Index for sorting by creation date (most common query pattern)

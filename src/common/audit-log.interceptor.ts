@@ -45,7 +45,7 @@ export class AuditLogInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap({
-        next: async (data) => {
+        next: async (_data) => {
           const executionTime = Date.now() - startTime;
           await this.createAuditLog({
             userId: user.userId || user.sub,
@@ -103,8 +103,8 @@ export class AuditLogInterceptor implements NestInterceptor {
         error instanceof Error
           ? error.message
           : typeof error === 'string'
-          ? error
-          : JSON.stringify(error);
+            ? error
+            : JSON.stringify(error);
       this.logger.error(`Failed to create audit log: ${message}`);
     }
   }

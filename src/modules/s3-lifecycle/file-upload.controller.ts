@@ -6,7 +6,7 @@ import {
   CompleteUploadDto,
   DeleteFileDto,
 } from './dtos/file-upload.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 @ApiTags('File Upload (S3 Lifecycle)')
 @Controller('files')
