@@ -6,10 +6,11 @@ yarn-error.log
 .env.local
 .env.*.local
 
-# Source files (we only need compiled dist/)
-src
+# Source files
 test
 scripts
+
+# Keep src, dist, and api for deployment
 
 # Development files
 *.spec.ts

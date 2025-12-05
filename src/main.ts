@@ -58,7 +58,12 @@ async function bootstrap() {
   });
 
   // Security: HTTP headers protection
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // Disable CSP to allow Swagger UI
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
 
   // Performance: Gzip compression
   app.use(compression());
