@@ -4,16 +4,26 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 /**
  * Setup Swagger API documentation
  * Accessible at /api/docs (configurable via SWAGGER_PATH env var)
+ *
+ * Note: Swagger is now ENABLED by default in all environments (including production)
+ * To disable: Set DISABLE_SWAGGER=true environment variable
  */
 export function setupSwagger(app: INestApplication): void {
   const isDevelopment = process.env.NODE_ENV !== 'production';
-  const swaggerEnabled = isDevelopment || process.env.ENABLE_SWAGGER === 'true';
 
-  if (!swaggerEnabled) {
-    console.log('📚 Swagger documentation disabled in production');
-    console.log('   To enable: Set ENABLE_SWAGGER=true environment variable');
-    console.log('   ⚠️  Warning: Exposing Swagger in production reveals API structure');
+  // Changed: Swagger is now enabled by default unless explicitly disabled
+  const swaggerDisabled = process.env.DISABLE_SWAGGER === 'true';
+
+  if (swaggerDisabled) {
+    console.log('📚 Swagger documentation disabled by DISABLE_SWAGGER flag');
     return;
+  }
+
+  // Log that Swagger is enabled
+  if (!isDevelopment) {
+    console.log('📚 Swagger documentation is ENABLED in production');
+    console.log('   ⚠️  API documentation is publicly accessible at /api/docs');
+    console.log('   To disable: Set DISABLE_SWAGGER=true environment variable');
   }
 
   // Build description with helpful information

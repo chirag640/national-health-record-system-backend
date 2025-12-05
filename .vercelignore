@@ -1,0 +1,57 @@
+# Vercel Deployment - Exclude from build
+node_modules
+npm-debug.log
+yarn-error.log
+.env
+.env.local
+.env.*.local
+
+# Source files (we only need compiled dist/)
+src
+test
+scripts
+
+# Development files
+*.spec.ts
+*.test.ts
+*.e2e-spec.ts
+.vscode
+.idea
+
+# Documentation
+docs
+*.md
+!README.md
+
+# Git
+.git
+.gitignore
+.github
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker-compose.prod.yml
+.dockerignore
+
+# CI/CD
+.gitlab-ci.yml
+.travis.yml
+
+# Logs
+logs
+*.log
+
+# Coverage
+coverage
+.nyc_output
+
+# Cache
+.cache
+.eslintcache
+
+# Misc
+.DS_Store
+*.swp
+*.swo
+*~
