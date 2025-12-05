@@ -26,5 +26,7 @@
     "noUnusedParameters": true, // Error on unused function parameters
     "noImplicitReturns": true, // Ensure all code paths return a value
     "noUncheckedIndexedAccess": true // Add undefined to unindexed property access
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test"]
 }
