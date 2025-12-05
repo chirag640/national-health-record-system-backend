@@ -2,10 +2,22 @@
   "version": 2,
   "buildCommand": "npm run vercel-build",
   "installCommand": "npm install",
-  "rewrites": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/api"
+      "src": "/api/docs/(.*)",
+      "dest": "/api"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api"
+    },
+    {
+      "src": "/health",
+      "dest": "/api"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api"
     }
   ],
   "functions": {
@@ -13,6 +25,5 @@
       "memory": 1024,
       "maxDuration": 30
     }
-  },
-  "outputDirectory": "dist"
+  }
 }

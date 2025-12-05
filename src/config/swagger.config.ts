@@ -76,6 +76,11 @@ export function setupSwagger(app: INestApplication): void {
       tagsSorter: 'alpha', // Sort tags alphabetically
       operationsSorter: 'alpha', // Sort operations alphabetically
     },
+    customCssUrl: ['https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.5/swagger-ui.min.css'],
+    customJs: [
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.5/swagger-ui-bundle.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.5/swagger-ui-standalone-preset.js',
+    ],
   });
 
   const fullUrl = `http://localhost:${process.env.PORT || 3000}/${swaggerPath}`;
