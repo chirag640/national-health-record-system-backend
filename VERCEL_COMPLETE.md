@@ -17,23 +17,30 @@ national-health-record-system/
 ## 🔧 How It Works
 
 ### 1. Build Process
+
 ```bash
 npm run vercel-build
 ```
+
 - Compiles TypeScript to `dist/` directory
 - `dist/main.js` contains your NestJS app with `exports.default`
 
 ### 2. Serverless Entry Point
+
 **`api/index.js`** (3 lines):
+
 ```javascript
 const { default: handler } = require('../dist/main');
 module.exports = handler;
 ```
+
 - Imports the serverless handler from compiled code
 - Vercel automatically detects files in `api/` directory
 
 ### 3. Routing
+
 **`vercel.json`**:
+
 ```json
 {
   "rewrites": [
@@ -44,10 +51,13 @@ module.exports = handler;
   ]
 }
 ```
+
 - All requests → `/api/index.js` → your NestJS app
 
 ### 4. Your `main.ts` Export
+
 Already has at the bottom:
+
 ```typescript
 export default async (req: any, res: any) => {
   if (!cachedApp) {
@@ -61,6 +71,7 @@ export default async (req: any, res: any) => {
 ## 🚀 Deployment Steps
 
 ### 1. Commit Changes
+
 ```bash
 git add .
 git commit -m "Perfect Vercel configuration with api wrapper"
@@ -68,6 +79,7 @@ git push origin main
 ```
 
 ### 2. Vercel Auto-Deploy
+
 - Detects push
 - Runs `npm run vercel-build`
 - Compiles TypeScript
@@ -82,13 +94,13 @@ git push origin main
 
 ## 🎉 Why This Works
 
-| Issue | Solution |
-|-------|----------|
-| Vercel expects `api/` directory | ✅ Created `api/index.js` wrapper |
-| Need compiled code | ✅ Wrapper imports from `dist/main.js` |
-| Export not recognized | ✅ Properly exports CommonJS default |
-| Swagger blocked by helmet | ✅ Disabled CSP in helmet config |
-| Routes not working | ✅ Rewrites all traffic to `/api` |
+| Issue                           | Solution                               |
+| ------------------------------- | -------------------------------------- |
+| Vercel expects `api/` directory | ✅ Created `api/index.js` wrapper      |
+| Need compiled code              | ✅ Wrapper imports from `dist/main.js` |
+| Export not recognized           | ✅ Properly exports CommonJS default   |
+| Swagger blocked by helmet       | ✅ Disabled CSP in helmet config       |
+| Routes not working              | ✅ Rewrites all traffic to `/api`      |
 
 ## 📝 Key Files Changed
 
@@ -100,6 +112,7 @@ git push origin main
 ## 🔍 Troubleshooting
 
 If still getting 404:
+
 1. Check Vercel build logs for TypeScript errors
 2. Verify `dist/main.js` exists after build
 3. Ensure environment variables are set in Vercel dashboard
@@ -108,6 +121,7 @@ If still getting 404:
 ## ✅ Expected Result
 
 After deployment:
+
 - No more 404 errors
 - Swagger UI visible at `/api/docs`
 - All API endpoints working
