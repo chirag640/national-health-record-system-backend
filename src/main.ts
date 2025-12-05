@@ -147,6 +147,14 @@ async function bootstrap() {
   // Setup Swagger API documentation at /api/docs
   setupSwagger(app);
 
+  await app.init();
+
+  return app;
+}
+
+async function startServer() {
+  const app = await bootstrap();
+
   const port = process.env.PORT || 3000;
   await app.listen(port);
 
@@ -174,4 +182,18 @@ async function bootstrap() {
   });
 }
 
-bootstrap();
+// For local development and Docker
+if (require.main === module) {
+  startServer();
+}
+
+// For Vercel serverless - cache the app instance
+let cachedApp: any = null;
+
+export default async (req: any, res: any) => {
+  if (!cachedApp) {
+    cachedApp = await bootstrap();
+  }
+  const expressApp = cachedApp.getHttpAdapter().getInstance();
+  return expressApp(req, res);
+};
