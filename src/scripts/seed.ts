@@ -43,6 +43,8 @@ async function seed() {
 
       console.log('   --force detected. Clearing existing data...\\n');
       // Clear all collections
+      await connection.collection('users').deleteMany({});
+      console.log('✅ Cleared existing users');
     }
 
     // Seed admin user
@@ -52,8 +54,7 @@ async function seed() {
 
     const adminUser = {
       email: process.env.ADMIN_EMAIL || 'admin@national-health-record-system.com',
-      password: hashedPassword,
-      name: 'System Administrator',
+      passwordHash: hashedPassword,
       role: 'Patient', // First role is typically admin
       emailVerified: true,
       emailVerificationToken: null,

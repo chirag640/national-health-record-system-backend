@@ -105,7 +105,15 @@ FRONTEND_URL=http://localhost:3000
 REDIS_URL=redis://localhost:6379
 ```
 
-### 4. Start Services
+### 4. Seed Database (First Time Only)
+
+```bash
+npm run seed
+```
+
+This creates the default admin user.
+
+### 5. Start Services
 
 ```bash
 # Terminal 1: MongoDB
@@ -124,16 +132,53 @@ npm run start:dev
 
 ---
 
+## 🔐 Default Admin Credentials
+
+After running `npm run seed`, use these credentials to login:
+
+```json
+{
+  "email": "admin@national-health-record-system.com",
+  "password": "Admin@123456",
+  "role": "Patient"
+}
+```
+
+**Login Endpoint:** `POST http://localhost:3000/api/auth/login`
+
+⚠️ **IMPORTANT:** Change this password in production!
+
+### Get Authorization Token:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@national-health-record-system.com",
+    "password": "Admin@123456",
+    "role": "Patient"
+  }'
+```
+
+Copy the `accessToken` from the response and use it in subsequent requests:
+
+```bash
+curl -X GET http://localhost:3000/api/v1/patients \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN_HERE"
+```
+
+---
+
 ## 🧪 Test the System
 
 ### Register a Patient
 
 ```bash
-curl -X POST http://localhost:3000/auth/register/patient \
+curl -X POST http://localhost:3000/api/auth/register/patient \
   -H "Content-Type: application/json" \
   -d '{
     "email": "patient@example.com",
-    "password": "Test@1234",
+    "password": "SecureP@ssw0rd123",
     "fullName": "Test Patient"
   }'
 ```
@@ -141,14 +186,21 @@ curl -X POST http://localhost:3000/auth/register/patient \
 ### Login
 
 ```bash
-curl -X POST http://localhost:3000/auth/login \
+curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "patient@example.com",
-    "password": "Test@1234",
+    "password": "SecureP@ssw0rd123",
     "role": "Patient"
   }'
 ```
+
+**Valid Role Values:**
+
+- `Patient` - for patient users
+- `Doctor` - for doctor users
+- `HospitalAdmin` - for hospital administrators
+- `SuperAdmin` - for super administrators
 
 **See [QUICK_START.md](QUICK_START.md) for complete testing guide.**
 
