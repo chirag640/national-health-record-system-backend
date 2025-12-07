@@ -52,6 +52,21 @@
       "key": "doctorId",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "prescriptionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "encounterId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -1341,6 +1356,529 @@
               ]
             },
             "description": "Cleanup old synced items (super admin only)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"prescription_expiring\",\n  \"priority\": \"high\",\n  \"recipientId\": \"{{patientId}}\",\n  \"title\": \"Prescription Expiring Soon\",\n  \"message\": \"Your prescription for Amoxicillin will expire in 3 days. Please renew it.\",\n  \"shortMessage\": \"Prescription expiring in 3 days\",\n  \"channels\": [\"in_app\", \"email\"],\n  \"category\": \"prescriptions\",\n  \"relatedEntityModel\": \"Prescription\",\n  \"deepLink\": \"healthapp://prescription/123\",\n  \"webLink\": \"https://app.example.com/prescriptions/123\",\n  \"actions\": [\n    {\n      \"label\": \"Renew Now\",\n      \"action\": \"renew_prescription\",\n      \"style\": \"primary\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications",
+            "description": "Create a new notification (Doctor, Hospital Admin, Super Admin only)"
+          }
+        },
+        {
+          "name": "Create Bulk Notifications",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientIds\": [\"{{patientId}}\"],\n  \"type\": \"system_maintenance\",\n  \"priority\": \"normal\",\n  \"title\": \"System Maintenance Notice\",\n  \"message\": \"System will be under maintenance from 2 AM to 4 AM on Sunday.\",\n  \"channels\": [\"in_app\", \"email\"],\n  \"category\": \"system\"\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications/bulk",
+            "description": "Send notifications to multiple users at once (Hospital Admin, Super Admin only)"
+          }
+        },
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/notifications?page=1&limit=20&status=sent&priority=high",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "sent",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "prescription_expiring",
+                  "disabled": true
+                },
+                {
+                  "key": "priority",
+                  "value": "high",
+                  "disabled": true
+                },
+                {
+                  "key": "isRead",
+                  "value": "false",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all notifications with optional filters"
+          }
+        },
+        {
+          "name": "Get My Unread Notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/notifications/me/unread?limit=50",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["notifications", "me", "unread"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Get my unread notifications"
+          }
+        },
+        {
+          "name": "Get My Notification Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/notifications/me/stats",
+            "description": "Get notification statistics (total, unread, read, by type, by priority)"
+          }
+        },
+        {
+          "name": "Mark All My Notifications as Read",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/notifications/me/mark-all-read",
+            "description": "Mark all my notifications as read"
+          }
+        },
+        {
+          "name": "Mark Many as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\"notification_id_1\", \"notification_id_2\"]\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications/mark-many-read",
+            "description": "Mark multiple notifications as read at once"
+          }
+        },
+        {
+          "name": "Get Notification by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/notifications/{{notificationId}}",
+            "description": "Get a single notification by ID"
+          }
+        },
+        {
+          "name": "Update Notification",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"read\",\n  \"readAt\": \"2024-12-07T14:30:00Z\"\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications/{{notificationId}}",
+            "description": "Update notification (Hospital Admin, Super Admin only)"
+          }
+        },
+        {
+          "name": "Mark as Read",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/notifications/{{notificationId}}/mark-read",
+            "description": "Mark a notification as read"
+          }
+        },
+        {
+          "name": "Acknowledge Notification",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/notifications/{{notificationId}}/acknowledge",
+            "description": "Acknowledge a notification that requires acknowledgment"
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrlV1}}/notifications/{{notificationId}}",
+            "description": "Delete a notification (soft delete) (Hospital Admin, Super Admin only)"
+          }
+        },
+        {
+          "name": "Bulk Delete Notifications",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\"notification_id_1\", \"notification_id_2\", \"notification_id_3\"]\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications/bulk/delete",
+            "description": "Delete multiple notifications at once (Hospital Admin, Super Admin only)"
+          }
+        },
+        {
+          "name": "Get My Preferences",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/notifications/preferences/me",
+            "description": "Get my notification preferences"
+          }
+        },
+        {
+          "name": "Update My Preferences",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true,\n  \"preferredChannels\": [\"in_app\", \"email\"],\n  \"quietHours\": {\n    \"enabled\": true,\n    \"startTime\": \"22:00\",\n    \"endTime\": \"08:00\",\n    \"excludeTypes\": [\"security_alert\", \"lab_result_critical\"]\n  },\n  \"enableGrouping\": true,\n  \"language\": \"en\",\n  \"timezone\": \"Asia/Kolkata\"\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications/preferences/me",
+            "description": "Update my notification preferences"
+          }
+        },
+        {
+          "name": "Add Device Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"fcm-device-token-abc123xyz\"\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications/preferences/me/device-token",
+            "description": "Add a device token for push notifications"
+          }
+        },
+        {
+          "name": "Remove Device Token",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrlV1}}/notifications/preferences/me/device-token/fcm-device-token-abc123xyz",
+            "description": "Remove a device token"
+          }
+        },
+        {
+          "name": "[Admin] Process Scheduled Notifications",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/notifications/admin/process-scheduled",
+            "description": "Process scheduled notifications ready to be sent (Super Admin only)"
+          }
+        },
+        {
+          "name": "[Admin] Process Expired Notifications",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/notifications/admin/process-expired",
+            "description": "Mark expired notifications (Super Admin only)"
+          }
+        },
+        {
+          "name": "[Admin] Cleanup Old Notifications",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrlV1}}/notifications/admin/cleanup?daysOld=90",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["notifications", "admin", "cleanup"],
+              "query": [
+                {
+                  "key": "daysOld",
+                  "value": "90",
+                  "description": "Delete notifications older than X days (default: 90)"
+                }
+              ]
+            },
+            "description": "Cleanup old read notifications (Super Admin only)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Prescriptions",
+      "item": [
+        {
+          "name": "Create Prescription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientGuid\": \"ABCD-1234-EFGH-5678\",\n  \"patient\": \"{{patientId}}\",\n  \"prescriber\": \"{{doctorId}}\",\n  \"organization\": \"{{hospitalId}}\",\n  \"medicationName\": \"Amoxicillin\",\n  \"genericName\": \"Amoxicillin\",\n  \"medicationCode\": \"RX12345\",\n  \"medicationCodeSystem\": \"RxNorm\",\n  \"dosageInstruction\": [\n    {\n      \"sequence\": 1,\n      \"text\": \"Take 500mg orally three times daily for 7 days\",\n      \"route\": \"oral\",\n      \"doseQuantityValue\": 500,\n      \"doseQuantityUnit\": \"mg\",\n      \"frequency\": \"TID\",\n      \"duration\": 7,\n      \"durationUnit\": \"d\"\n    }\n  ],\n  \"dispenseRequest\": {\n    \"numberOfRepeatsAllowed\": 2,\n    \"quantityValue\": 21,\n    \"quantityUnit\": \"tablet\",\n    \"expectedSupplyDuration\": 7,\n    \"expectedSupplyDurationUnit\": \"d\"\n  },\n  \"substitutionAllowance\": {\n    \"allowed\": true,\n    \"reason\": \"Cost savings\"\n  },\n  \"authoredOn\": \"2024-12-07T10:00:00Z\",\n  \"intent\": \"order\",\n  \"priority\": \"routine\",\n  \"courseOfTherapy\": \"acute\",\n  \"isControlledSubstance\": false,\n  \"requiresPreauthorization\": false\n}"
+            },
+            "url": "{{baseUrlV1}}/prescriptions",
+            "description": "Create a new prescription (Doctor, Super Admin only)"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data._id) {",
+                  "        pm.collectionVariables.set('prescriptionId', response.data._id);",
+                  "        console.log('✅ Prescription ID saved:', response.data._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Prescriptions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/prescriptions?page=1&limit=20&status=active",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["prescriptions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true
+                },
+                {
+                  "key": "patient",
+                  "value": "{{patientId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "prescriber",
+                  "value": "{{doctorId}}",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all prescriptions with filters"
+          }
+        },
+        {
+          "name": "Get Active Prescriptions for Patient",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/prescriptions/patient/{{patientId}}/active",
+            "description": "Get all active prescriptions for a specific patient"
+          }
+        },
+        {
+          "name": "Get Prescriptions Needing Refill",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/prescriptions/patient/{{patientId}}/needing-refill",
+            "description": "Get prescriptions that need refill (≤1 refill remaining)"
+          }
+        },
+        {
+          "name": "Get Patient Prescription Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/prescriptions/patient/{{patientId}}/stats",
+            "description": "Get prescription statistics for a patient"
+          }
+        },
+        {
+          "name": "Get Prescriptions by Encounter",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/prescriptions/encounter/{{encounterId}}",
+            "description": "Get all prescriptions for a specific encounter"
+          }
+        },
+        {
+          "name": "Get Expiring Prescriptions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/prescriptions/expiring?days=7",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["prescriptions", "expiring"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "7",
+                  "description": "Days ahead to check (default: 30)"
+                }
+              ]
+            },
+            "description": "Get prescriptions expiring soon"
+          }
+        },
+        {
+          "name": "Search Prescriptions by Medication",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/prescriptions/search?medication=Amoxicillin",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["prescriptions", "search"],
+              "query": [
+                {
+                  "key": "medication",
+                  "value": "Amoxicillin"
+                }
+              ]
+            },
+            "description": "Full-text search prescriptions by medication name"
+          }
+        },
+        {
+          "name": "Get Prescription by Number",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/prescriptions/number/RX-2024-000001",
+            "description": "Get prescription by unique prescription number (RX-YYYY-NNNNNN format)"
+          }
+        },
+        {
+          "name": "Get Prescription by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}",
+            "description": "Get a single prescription by MongoDB ID"
+          }
+        },
+        {
+          "name": "Update Prescription",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Updated dosage instructions\",\n  \"dispenseRequest\": {\n    \"numberOfRepeatsAllowed\": 3\n  }\n}"
+            },
+            "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}",
+            "description": "Update prescription (Doctor, Super Admin only). Cannot update completed/cancelled/stopped prescriptions."
+          }
+        },
+        {
+          "name": "Cancel Prescription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Patient requested cancellation\"\n}"
+            },
+            "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}/cancel",
+            "description": "Cancel a prescription with reason (Doctor, Super Admin only)"
+          }
+        },
+        {
+          "name": "Stop Prescription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Treatment completed successfully\"\n}"
+            },
+            "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}/stop",
+            "description": "Stop prescription for therapeutic reasons (Doctor, Super Admin only)"
+          }
+        },
+        {
+          "name": "Mark Prescription as Dispensed",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}/dispense",
+            "description": "Mark prescription as dispensed (Hospital Admin, Super Admin only). Auto-completes when refills exhausted."
+          }
+        },
+        {
+          "name": "Delete Prescription",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}",
+            "description": "Delete prescription (soft delete, only draft/entered-in-error) (Doctor, Super Admin only)"
           }
         }
       ]

@@ -23,6 +23,9 @@ import { HealthDocumentModule } from './modules/health-document/health-document.
 import { ConsentModule } from './modules/consent/consent.module';
 import { AuditLogModule } from './modules/audit-log/audit-log.module';
 import { SyncModule } from './modules/sync/sync.module';
+import { AppointmentModule } from './modules/appointment/appointment.module';
+import { PrescriptionModule } from './modules/prescription/prescription.module';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
   imports: [
@@ -69,6 +72,9 @@ import { SyncModule } from './modules/sync/sync.module';
     ConsentModule,
     AuditLogModule,
     SyncModule, // Offline sync for rural hospitals
+    AppointmentModule, // Appointment management system
+    PrescriptionModule, // Prescription management system
+    NotificationModule, // Enhanced notification system with multi-channel support
   ],
   controllers: [AppController],
   providers: [AppService],
