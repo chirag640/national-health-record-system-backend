@@ -25,10 +25,10 @@ export class QueueConfigService {
    * Job Priorities
    */
   readonly PRIORITY: QueuePriority = {
-    CRITICAL: 1,  // User-facing, immediate
-    HIGH: 2,      // Important, near-realtime
-    NORMAL: 5,    // Standard processing
-    LOW: 10,      // Background, can be delayed
+    CRITICAL: 1, // User-facing, immediate
+    HIGH: 2, // Important, near-realtime
+    NORMAL: 5, // Standard processing
+    LOW: 10, // Background, can be delayed
   };
 
   /**
@@ -58,7 +58,7 @@ export class QueueConfigService {
    */
   getConcurrency(queueName: string): number {
     const key = `QUEUE_${queueName.toUpperCase()}_CONCURRENCY`;
-    
+
     const defaults: Record<string, number> = {
       QUEUE_NOTIFICATION_CONCURRENCY: 5,
       QUEUE_DOCUMENT_CONCURRENCY: 3,

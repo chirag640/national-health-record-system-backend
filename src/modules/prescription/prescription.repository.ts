@@ -19,7 +19,13 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
   /**
    * Find prescriptions with filters and pagination
    */
-  async findWithFilters(filters: PrescriptionFilterDto) {
+  async findWithFilters(filters: PrescriptionFilterDto): Promise<{
+    data: PrescriptionDocument[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
     const {
       patient,
       patientGuid,
@@ -42,13 +48,27 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
 
     const query: FilterQuery<PrescriptionDocument> = { isDeleted: false };
 
-    if (patient) query.patient = patient;
-    if (patientGuid) query.patientGuid = patientGuid;
-    if (prescriber) query.prescriber = prescriber;
-    if (encounter) query.encounter = encounter;
-    if (organization) query.organization = organization;
-    if (status) query.status = status;
-    if (priority) query.priority = priority;
+    if (patient) {
+      query.patient = patient;
+    }
+    if (patientGuid) {
+      query.patientGuid = patientGuid;
+    }
+    if (prescriber) {
+      query.prescriber = prescriber;
+    }
+    if (encounter) {
+      query.encounter = encounter;
+    }
+    if (organization) {
+      query.organization = organization;
+    }
+    if (status) {
+      query.status = status;
+    }
+    if (priority) {
+      query.priority = priority;
+    }
     if (medicationName) {
       query.$or = [
         { medicationName: new RegExp(medicationName, 'i') },
@@ -96,7 +116,9 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
         .populate('patient', 'name email phone')
         .populate('prescriber', 'name specialization licenseNumber')
         .populate('organization', 'name address')
-        .lean()
+        .populate('patient', 'name email phone')
+        .populate('prescriber', 'name specialization licenseNumber')
+        .populate('organization', 'name address')
         .exec(),
       this.prescriptionModel.countDocuments(query).exec(),
     ]);
@@ -113,7 +135,7 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
   /**
    * Get active prescriptions for a patient
    */
-  async findActiveByPatient(patientId: string) {
+  async findActiveByPatient(patientId: string): Promise<PrescriptionDocument[]> {
     return this.prescriptionModel
       .find({
         patient: patientId,
@@ -123,14 +145,13 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
       .sort({ authoredOn: -1 })
       .populate('prescriber', 'name specialization')
       .populate('organization', 'name')
-      .lean()
       .exec();
   }
 
   /**
    * Get prescriptions by encounter
    */
-  async findByEncounter(encounterId: string) {
+  async findByEncounter(encounterId: string): Promise<PrescriptionDocument[]> {
     return this.prescriptionModel
       .find({
         encounter: encounterId,
@@ -138,14 +159,17 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
       })
       .sort({ authoredOn: -1 })
       .populate('prescriber', 'name specialization')
-      .lean()
       .exec();
   }
 
   /**
    * Find prescriptions by prescriber with date range
    */
-  async findByPrescriberAndDateRange(prescriberId: string, startDate: Date, endDate: Date) {
+  async findByPrescriberAndDateRange(
+    prescriberId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<PrescriptionDocument[]> {
     return this.prescriptionModel
       .find({
         prescriber: prescriberId,
@@ -155,14 +179,13 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
       .sort({ authoredOn: -1 })
       .populate('patient', 'name phone')
       .populate('organization', 'name')
-      .lean()
       .exec();
   }
 
   /**
    * Find expiring prescriptions (within next N days)
    */
-  async findExpiringPrescriptions(daysAhead: number = 7) {
+  async findExpiringPrescriptions(daysAhead: number = 7): Promise<PrescriptionDocument[]> {
     const now = new Date();
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + daysAhead);
@@ -179,14 +202,13 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
       .sort({ 'dispenseRequest.validityPeriodEnd': 1 })
       .populate('patient', 'name email phone')
       .populate('prescriber', 'name')
-      .lean()
       .exec();
   }
 
   /**
    * Find prescriptions needing refill (low refills remaining)
    */
-  async findNeedingRefill(patientId: string) {
+  async findNeedingRefill(patientId: string): Promise<PrescriptionDocument[]> {
     return this.prescriptionModel
       .find({
         patient: patientId,
@@ -210,14 +232,13 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
         },
       })
       .sort({ 'dispenseRequest.validityPeriodEnd': 1 })
-      .lean()
       .exec();
   }
 
   /**
    * Find by prescription number
    */
-  async findByPrescriptionNumber(prescriptionNumber: string) {
+  async findByPrescriptionNumber(prescriptionNumber: string): Promise<PrescriptionDocument | null> {
     return this.prescriptionModel
       .findOne({
         prescriptionNumber,
@@ -227,7 +248,6 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
       .populate('prescriber', 'name specialization licenseNumber')
       .populate('organization', 'name address contact')
       .populate('encounter')
-      .lean()
       .exec();
   }
 
@@ -250,7 +270,11 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
   /**
    * Find controlled substances by prescriber (for auditing)
    */
-  async findControlledSubstancesByPrescriber(prescriberId: string, startDate: Date, endDate: Date) {
+  async findControlledSubstancesByPrescriber(
+    prescriberId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<PrescriptionDocument[]> {
     return this.prescriptionModel
       .find({
         prescriber: prescriberId,
@@ -260,7 +284,6 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
       })
       .sort({ authoredOn: -1 })
       .populate('patient', 'name guid')
-      .lean()
       .exec();
   }
 
@@ -300,7 +323,10 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
   /**
    * Search prescriptions by medication name (text search)
    */
-  async searchByMedication(searchTerm: string, limit: number = 20) {
+  async searchByMedication(
+    searchTerm: string,
+    limit: number = 20,
+  ): Promise<PrescriptionDocument[]> {
     return this.prescriptionModel
       .find(
         {
@@ -313,7 +339,6 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
       .limit(limit)
       .populate('patient', 'name')
       .populate('prescriber', 'name')
-      .lean()
       .exec();
   }
 }

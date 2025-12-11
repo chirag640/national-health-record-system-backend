@@ -10,6 +10,8 @@ import {
   BulkNotificationJob,
 } from '../interfaces/notification-jobs.interface';
 import { EmailService } from '../../../email/email.service';
+import { FirebaseService } from '../../notification/services/firebase.service';
+import { SmsService } from '../../notification/services/sms.service';
 
 @Processor(QUEUE_NAMES.NOTIFICATION, {
   concurrency: parseInt(process.env.QUEUE_NOTIFICATION_CONCURRENCY || '5'),
@@ -23,8 +25,9 @@ export class NotificationProcessor extends WorkerHost {
   private readonly logger = new Logger(NotificationProcessor.name);
 
   constructor(
-    /* private readonly _configService: ConfigService, */
     private readonly emailService: EmailService,
+    private readonly firebaseService: FirebaseService,
+    private readonly smsService: SmsService,
   ) {
     super();
   }
@@ -52,7 +55,7 @@ export class NotificationProcessor extends WorkerHost {
         default:
           throw new Error(`Unknown job type: ${job.name}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Error processing ${job.name} job ${job.id}:`, error);
       throw error;
     }
@@ -66,22 +69,36 @@ export class NotificationProcessor extends WorkerHost {
 
     await job.updateProgress(20);
 
-    // TODO: Implement actual reminder sending logic
-    // Example: Send SMS/Email/Push notification to worker
-    // Message: Hello {workerName}, this is a reminder for your {appointmentType} appointment.
+    try {
+      const results: any = {
+        appointmentId: data.appointmentId,
+        sentAt: new Date(),
+      };
 
-    if (data.workerPhone) {
-      // Send SMS (integrate with SMS service)
-      this.logger.log(`Sending SMS to ${data.workerPhone}`);
+      // Send SMS reminder if phone number is provided
+      if (data.workerPhone) {
+        const message =
+          `Hello ${data.workerName},\n` +
+          `This is a reminder for your ${data.appointmentType} appointment.\n` +
+          `Thank you!`;
+
+        const smsResult = await this.smsService.sendSms(data.workerPhone, message);
+        results.sms = smsResult;
+        this.logger.log(
+          `SMS reminder sent to ${data.workerPhone}: ${smsResult.success ? 'Success' : 'Failed'}`,
+        );
+      }
+
+      await job.updateProgress(100);
+
+      return {
+        success: true,
+        ...results,
+      };
+    } catch (error: any) {
+      this.logger.error(`Failed to send follow-up reminder:`, error);
+      throw error;
     }
-
-    await job.updateProgress(100);
-
-    return {
-      success: true,
-      appointmentId: data.appointmentId,
-      sentAt: new Date(),
-    };
   }
 
   /**
@@ -92,17 +109,41 @@ export class NotificationProcessor extends WorkerHost {
 
     await job.updateProgress(30);
 
-    // TODO: Integrate with push notification service (FCM, APNs, etc.)
-    // Example implementation:
-    // await this.fcmService.send(data.userId, data.title, data.message, data.data);
+    try {
+      // Send push notification via Firebase Cloud Messaging
+      if (data.deviceTokens && data.deviceTokens.length > 0) {
+        const result = await this.firebaseService.sendToMultipleDevices(
+          data.deviceTokens,
+          {
+            title: data.title,
+            body: data.message,
+            imageUrl: data.imageUrl,
+          },
+          data.data,
+        );
 
-    await job.updateProgress(100);
+        await job.updateProgress(100);
 
-    return {
-      success: true,
-      userId: data.userId,
-      sentAt: new Date(),
-    };
+        return {
+          success: result.success,
+          userId: data.userId,
+          successCount: result.successCount,
+          failureCount: result.failureCount,
+          sentAt: new Date(),
+        };
+      } else {
+        this.logger.warn(`No device tokens found for user ${data.userId}`);
+        return {
+          success: false,
+          userId: data.userId,
+          error: 'No device tokens',
+          sentAt: new Date(),
+        };
+      }
+    } catch (error: any) {
+      this.logger.error(`Failed to send push notification to user ${data.userId}:`, error);
+      throw error;
+    }
   }
 
   /**
@@ -151,7 +192,7 @@ export class NotificationProcessor extends WorkerHost {
         template: data.template,
         sentAt: new Date(),
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to send email to ${data.to}:`, error);
       throw error;
     }
@@ -165,17 +206,23 @@ export class NotificationProcessor extends WorkerHost {
 
     await job.updateProgress(30);
 
-    // TODO: Integrate with SMS service (Twilio, AWS SNS, etc.)
-    // Example implementation:
-    // await this.smsService.send(data.phoneNumber, data.message);
+    try {
+      // Send SMS via Twilio
+      const result = await this.smsService.sendSms(data.phoneNumber, data.message);
 
-    await job.updateProgress(100);
+      await job.updateProgress(100);
 
-    return {
-      success: true,
-      phoneNumber: data.phoneNumber,
-      sentAt: new Date(),
-    };
+      return {
+        success: result.success,
+        phoneNumber: data.phoneNumber,
+        messageId: result.messageId,
+        error: result.error,
+        sentAt: new Date(),
+      };
+    } catch (error: any) {
+      this.logger.error(`Failed to send SMS to ${data.phoneNumber}:`, error);
+      throw error;
+    }
   }
 
   /**
@@ -198,7 +245,7 @@ export class NotificationProcessor extends WorkerHost {
         }
 
         results.push({ userId, success: true });
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error(`Failed to send notification to user ${userId}:`, error);
         const errorMessage =
           error && typeof error === 'object' && 'message' in error

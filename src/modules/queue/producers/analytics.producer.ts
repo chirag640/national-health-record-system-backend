@@ -28,10 +28,7 @@ export class AnalyticsProducer {
     const job = await this.analyticsQueue.add(
       'worker-stats',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.LOW,
-        'background',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.LOW, 'background'),
     );
 
     this.logger.log(`Queued worker stats job ${job.id} for ${data.type} analytics`);
@@ -45,10 +42,7 @@ export class AnalyticsProducer {
     const job = await this.analyticsQueue.add(
       'visit-stats',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.LOW,
-        'background',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.LOW, 'background'),
     );
 
     this.logger.log(`Queued visit stats job ${job.id} for ${data.type} analytics`);
@@ -62,10 +56,7 @@ export class AnalyticsProducer {
     const job = await this.analyticsQueue.add(
       'document-usage',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.LOW,
-        'background',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.LOW, 'background'),
     );
 
     this.logger.log(`Queued document usage job ${job.id} for ${data.type} analysis`);
@@ -79,10 +70,7 @@ export class AnalyticsProducer {
     const job = await this.analyticsQueue.add(
       'user-activity',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.NORMAL,
-        'standard',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.NORMAL, 'standard'),
     );
 
     this.logger.log(`Queued user activity job ${job.id} for user ${data.userId}`);
@@ -96,10 +84,7 @@ export class AnalyticsProducer {
     const job = await this.analyticsQueue.add(
       'system-health',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.NORMAL,
-        'standard',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.NORMAL, 'standard'),
     );
 
     this.logger.log(`Queued system health job ${job.id}`);
@@ -113,12 +98,9 @@ export class AnalyticsProducer {
     const job = await this.analyticsQueue.add(
       'report-generation',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.NORMAL,
-        'background',
-        undefined,
-        { jobId: `report-${data.reportId}` },
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.NORMAL, 'background', undefined, {
+        jobId: `report-${data.reportId}`,
+      }),
     );
 
     this.logger.log(`Queued report generation job ${job.id} (${data.reportType})`);
@@ -130,7 +112,7 @@ export class AnalyticsProducer {
    */
   async scheduleDailyAnalytics() {
     const today = new Date();
-    
+
     // Schedule worker stats
     await this.calculateWorkerStats({
       type: 'daily',
@@ -159,7 +141,7 @@ export class AnalyticsProducer {
    */
   async getJobStatus(jobId: string) {
     const job = await this.analyticsQueue.getJob(jobId);
-    
+
     if (!job) {
       return null;
     }

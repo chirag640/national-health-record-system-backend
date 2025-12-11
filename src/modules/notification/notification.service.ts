@@ -116,7 +116,7 @@ export class NotificationService {
           scheduledFor: createBulkDto.scheduledFor,
         } as CreateNotificationDto);
         created++;
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error(`Failed to create notification for user ${recipientId}:`, error);
         failed++;
       }
@@ -259,7 +259,7 @@ export class NotificationService {
           .findByIdAndUpdate(id, { isDeleted: true, deletedAt: new Date() })
           .exec();
         deletedCount++;
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error(`Failed to delete notification ${id}:`, error);
       }
     }
@@ -287,7 +287,7 @@ export class NotificationService {
         await this.queueForDelivery(notification);
         notification.status = NotificationStatus.SENT;
         await notification.save();
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error(`Failed to process scheduled notification ${notification._id}:`, error);
       }
     }
@@ -438,7 +438,7 @@ export class NotificationService {
           status: 'success',
           sentAt: new Date(),
         });
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error(`Failed to deliver notification via ${channel}:`, error);
 
         // Record delivery failure

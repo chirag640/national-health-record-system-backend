@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/mongoose';
-import { Model, Connection } from 'mongoose';
+import { Model, Connection, FilterQuery } from 'mongoose';
 import { Doctor, DoctorDocument } from './schemas/doctor.schema';
 import { BaseRepository } from '../../common/base.repository';
 
@@ -14,35 +14,26 @@ export class DoctorRepository extends BaseRepository<DoctorDocument> {
     super(doctorModel, connection);
   }
 
-  async create(data: Partial<Doctor>): Promise<Doctor> {
+  async create(data: Partial<DoctorDocument>): Promise<DoctorDocument> {
     const created = new this.doctorModel(data);
-    const saved = await created.save();
-    return saved.toObject() as Doctor;
+    return await created.save();
   }
 
-  async findAll(skip: number = 0, limit: number = 10): Promise<Doctor[]> {
-    return this.doctorModel
-      .find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 }) // Most recent first
-      .lean()
-      .exec() as Promise<Doctor[]>;
+  async findAll(skip: number = 0, limit: number = 10): Promise<DoctorDocument[]> {
+    return this.doctorModel.find().skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
   }
 
-  async findById(id: string): Promise<Doctor | null> {
-    return this.doctorModel.findById(id).lean().exec() as Promise<Doctor | null>;
+  async findById(id: string): Promise<DoctorDocument | null> {
+    return this.doctorModel.findById(id).exec();
   }
 
-  async update(id: string, data: Partial<Doctor>): Promise<Doctor | null> {
-    return this.doctorModel
-      .findByIdAndUpdate(id, data, { new: true })
-      .lean()
-      .exec() as Promise<Doctor | null>;
+  async update(id: string, data: Partial<DoctorDocument>): Promise<DoctorDocument | null> {
+    return this.doctorModel.findByIdAndUpdate(id, data, { new: true }).exec();
   }
 
-  async delete(id: string): Promise<Doctor | null> {
-    return this.doctorModel.findByIdAndDelete(id).lean().exec() as Promise<Doctor | null>;
+  async delete(id: string): Promise<boolean> {
+    const result = await this.doctorModel.findByIdAndDelete(id).exec();
+    return !!result;
   }
 
   async count(): Promise<number> {
@@ -52,20 +43,18 @@ export class DoctorRepository extends BaseRepository<DoctorDocument> {
   /**
    * Advanced search with custom query
    */
-  async search(query: any, skip: number = 0, limit: number = 10): Promise<Doctor[]> {
-    return this.doctorModel
-      .find(query)
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .lean()
-      .exec() as Promise<Doctor[]>;
+  async search(
+    query: FilterQuery<DoctorDocument>,
+    skip: number = 0,
+    limit: number = 10,
+  ): Promise<DoctorDocument[]> {
+    return this.doctorModel.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
   }
 
   /**
    * Count documents matching query
    */
-  async countByQuery(query: any): Promise<number> {
+  async countByQuery(query: FilterQuery<DoctorDocument>): Promise<number> {
     return this.doctorModel.countDocuments(query).exec();
   }
 

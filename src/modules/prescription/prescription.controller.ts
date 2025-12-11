@@ -28,6 +28,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { UserPayload } from '../../common/interfaces/user-payload.interface';
 import { UserRole } from '../../auth/schemas/user.schema';
 
 @ApiTags('Prescriptions')
@@ -53,7 +54,7 @@ export class PrescriptionController {
   })
   async create(
     @Body() createPrescriptionDto: CreatePrescriptionDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: UserPayload,
   ): Promise<any> {
     return this.prescriptionService.create(createPrescriptionDto, user.userId);
   }
@@ -67,7 +68,10 @@ export class PrescriptionController {
     type: PrescriptionListOutputDto,
   })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
-  async findAll(@Query() filters: PrescriptionFilterDto, @CurrentUser() user: any): Promise<any> {
+  async findAll(
+    @Query() filters: PrescriptionFilterDto,
+    @CurrentUser() user: UserPayload,
+  ): Promise<any> {
     // If user is a patient, filter to their own prescriptions
     if (user.role === UserRole.PATIENT) {
       filters.patient = user.patientId;
@@ -90,7 +94,10 @@ export class PrescriptionController {
     description: 'Active prescriptions retrieved',
     type: [PrescriptionOutputDto],
   })
-  async getActiveForPatient(@Param('patientId') patientId: string, @CurrentUser() user: any) {
+  async getActiveForPatient(
+    @Param('patientId') patientId: string,
+    @CurrentUser() user: UserPayload,
+  ) {
     // Authorization: patients can only view their own
     if (user.role === UserRole.PATIENT && user.patientId !== patientId) {
       throw new Error('Forbidden');
@@ -108,7 +115,7 @@ export class PrescriptionController {
     description: 'Prescriptions needing refill',
     type: [PrescriptionOutputDto],
   })
-  async getNeedingRefill(@Param('patientId') patientId: string, @CurrentUser() user: any) {
+  async getNeedingRefill(@Param('patientId') patientId: string, @CurrentUser() user: UserPayload) {
     if (user.role === UserRole.PATIENT && user.patientId !== patientId) {
       throw new Error('Forbidden');
     }
@@ -124,7 +131,7 @@ export class PrescriptionController {
     status: HttpStatus.OK,
     description: 'Prescription statistics retrieved',
   })
-  async getPatientStats(@Param('patientId') patientId: string, @CurrentUser() user: any) {
+  async getPatientStats(@Param('patientId') patientId: string, @CurrentUser() user: UserPayload) {
     if (user.role === UserRole.PATIENT && user.patientId !== patientId) {
       throw new Error('Forbidden');
     }
@@ -221,7 +228,7 @@ export class PrescriptionController {
   async update(
     @Param('id') id: string,
     @Body() updatePrescriptionDto: UpdatePrescriptionDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: UserPayload,
   ) {
     return this.prescriptionService.update(id, updatePrescriptionDto, user.userId);
   }
@@ -237,7 +244,11 @@ export class PrescriptionController {
     type: PrescriptionOutputDto,
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Cannot cancel' })
-  async cancel(@Param('id') id: string, @Body('reason') reason: string, @CurrentUser() user: any) {
+  async cancel(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @CurrentUser() user: UserPayload,
+  ) {
     return this.prescriptionService.cancel(id, reason, user.userId);
   }
 
@@ -252,7 +263,11 @@ export class PrescriptionController {
     type: PrescriptionOutputDto,
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Cannot stop' })
-  async stop(@Param('id') id: string, @Body('reason') reason: string, @CurrentUser() user: any) {
+  async stop(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @CurrentUser() user: UserPayload,
+  ) {
     return this.prescriptionService.stop(id, reason, user.userId);
   }
 
@@ -267,7 +282,7 @@ export class PrescriptionController {
     type: PrescriptionOutputDto,
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Cannot dispense' })
-  async markDispensed(@Param('id') id: string, @CurrentUser() user: any) {
+  async markDispensed(@Param('id') id: string, @CurrentUser() user: UserPayload) {
     return this.prescriptionService.markDispensed(id, user.userId);
   }
 
@@ -279,7 +294,7 @@ export class PrescriptionController {
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Prescription deleted' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Cannot delete' })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Prescription not found' })
-  async remove(@Param('id') id: string, @CurrentUser() user: any) {
+  async remove(@Param('id') id: string, @CurrentUser() user: UserPayload) {
     await this.prescriptionService.remove(id, user.userId);
   }
 }

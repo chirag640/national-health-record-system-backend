@@ -93,7 +93,7 @@ export class EncryptionService {
 
           // Remove plaintext field
           delete record[fieldName];
-        } catch (error) {
+        } catch (error: any) {
           const err = error as Error;
           this.logger.error(`Failed to encrypt field: ${fieldName}`, err.stack);
           throw new Error(`Encryption failed for field: ${fieldName}`);
@@ -108,7 +108,7 @@ export class EncryptionService {
       key.fill(0);
 
       return record;
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logger.error('Failed to encrypt record', err.stack);
       throw new Error(`Record encryption failed: ${err.message}`);
@@ -168,7 +168,7 @@ export class EncryptionService {
             // Not JSON, use as string
             record[fieldName] = decrypted;
           }
-        } catch (error) {
+        } catch (error: any) {
           const err = error as Error;
           this.logger.error(`Failed to decrypt field: ${fieldName}`, err.stack);
           throw new Error(
@@ -185,7 +185,7 @@ export class EncryptionService {
       key.fill(0);
 
       return record;
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logger.error('Failed to decrypt record', err.stack);
       throw new Error(`Record decryption failed: ${err.message}`);
@@ -356,7 +356,7 @@ export class EncryptionService {
       const decrypted = await this.decryptRecord(encrypted, ['testField']);
 
       return decrypted.testField === 'test data';
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logger.error('Encryption health check failed', err.stack);
       return false;

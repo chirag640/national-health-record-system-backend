@@ -27,7 +27,7 @@ async function bootstrap() {
   // Validate environment variables before starting
   try {
     validateEnv();
-  } catch (error) {
+  } catch (error: any) {
     console.warn('Environment validation warning (non-critical for serverless):', error);
   }
 
@@ -91,7 +91,9 @@ async function bootstrap() {
   // Security: Configurable request body size limits to prevent DoS attacks
   // Default: 1mb (increase via REQUEST_BODY_LIMIT env var if needed for file uploads)
   const bodyLimit = process.env.REQUEST_BODY_LIMIT || '1mb';
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   app.use(require('express').json({ limit: bodyLimit }));
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   app.use(require('express').urlencoded({ limit: bodyLimit, extended: true }));
 
   // Enable validation globally with DTO decorators
@@ -172,24 +174,28 @@ async function startServer() {
   logger.log(`❤️  Health check available at: http://localhost:${port}/health`);
 
   // Handle graceful shutdown on SIGTERM and SIGINT
-  process.on('SIGTERM', async () => {
-    logger.log('⚠️  SIGTERM signal received: closing HTTP server gracefully');
-    await app.close();
-    logger.log('✅ HTTP server closed successfully');
-    process.exit(0);
+  process.on('SIGTERM', () => {
+    void (async () => {
+      logger.log('⚠️  SIGTERM signal received: closing HTTP server gracefully');
+      await app.close();
+      logger.log('✅ HTTP server closed successfully');
+      process.exit(0);
+    })();
   });
 
-  process.on('SIGINT', async () => {
-    logger.log('⚠️  SIGINT signal received: closing HTTP server gracefully');
-    await app.close();
-    logger.log('✅ HTTP server closed successfully');
-    process.exit(0);
+  process.on('SIGINT', () => {
+    void (async () => {
+      logger.log('⚠️  SIGINT signal received: closing HTTP server gracefully');
+      await app.close();
+      logger.log('✅ HTTP server closed successfully');
+      process.exit(0);
+    })();
   });
 }
 
 // For local development and Docker
 if (require.main === module) {
-  startServer();
+  void startServer();
 }
 
 // For Vercel serverless - cache the app instance

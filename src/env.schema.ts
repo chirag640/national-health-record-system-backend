@@ -106,7 +106,7 @@ export type EnvConfig = z.infer<typeof EnvSchema>;
 export function validateEnv(): EnvConfig {
   try {
     return EnvSchema.parse(process.env);
-  } catch (error) {
+  } catch (error: any) {
     if (error instanceof z.ZodError) {
       const messages = error.errors
         .map((err) => {

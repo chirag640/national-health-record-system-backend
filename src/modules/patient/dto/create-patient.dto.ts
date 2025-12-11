@@ -23,7 +23,9 @@ export class CreatePatientDto {
     maxLength: 255,
   })
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     // Sanitize HTML to prevent XSS attacks
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
@@ -41,7 +43,9 @@ export class CreatePatientDto {
     maxLength: 50,
   })
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     // Sanitize HTML to prevent XSS attacks
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
@@ -59,7 +63,9 @@ export class CreatePatientDto {
     maxLength: 20,
   })
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     // Sanitize HTML to prevent XSS attacks
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
@@ -86,11 +92,17 @@ export class CreatePatientDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     // Handle various date formats
     const date = new Date(value);
-    if (isNaN(date.getTime())) return value; // Let validator handle invalid dates
+    if (isNaN(date.getTime())) {
+      return value;
+    } // Let validator handle invalid dates
     return date.toISOString(); // Normalize to ISO 8601
   })
   @IsISO8601({ strict: false })
@@ -105,8 +117,12 @@ export class CreatePatientDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     return value;
   })
   @IsObject()
@@ -120,8 +136,12 @@ export class CreatePatientDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     return value;
   })
   @IsArray()
@@ -136,8 +156,12 @@ export class CreatePatientDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     return value;
   })
   @IsArray()
@@ -154,8 +178,12 @@ export class CreatePatientDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     // Sanitize HTML to prevent XSS attacks
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
@@ -173,8 +201,12 @@ export class CreatePatientDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     return value;
   })
   @IsObject()
@@ -188,8 +220,12 @@ export class CreatePatientDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     return value;
   })
   @IsBoolean()
@@ -204,8 +240,12 @@ export class CreatePatientDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     return value;
   })
   @IsBoolean()

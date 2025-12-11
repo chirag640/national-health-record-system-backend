@@ -11,7 +11,14 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { ConsentService } from './consent.service';
 import { CreateConsentDto } from './dto/create-consent.dto';
 import { UpdateConsentDto } from './dto/update-consent.dto';
@@ -36,6 +43,17 @@ export class ConsentController {
     summary: 'Grant consent',
     description: 'Patient grants access to doctor/hospital. Admin can grant in emergency with OTP.',
   })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Consent granted successfully',
+    type: ConsentOutputDto,
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid consent data' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Forbidden - Patient or Admin role required',
+  })
   create(@Body() dto: CreateConsentDto): Promise<ConsentOutputDto> {
     return this.consentService.create(dto);
   }
@@ -46,13 +64,35 @@ export class ConsentController {
     summary: 'List consents',
     description: 'Patient sees own consents. Doctor sees granted consents. Admin sees all.',
   })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number (default: 1)' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Items per page (default: 20)' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Consents retrieved successfully',
+  })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
   findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
     return this.consentService.findAll(page, limit);
   }
 
   @Get(':id')
   @Roles(UserRole.PATIENT, UserRole.DOCTOR, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
-  @ApiOperation({ summary: 'Get consent details' })
+  @ApiOperation({
+    summary: 'Get consent details',
+    description: 'Retrieve detailed consent information including scope, expiry, and status',
+  })
+  @ApiParam({ name: 'id', description: 'Consent MongoDB ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Consent retrieved successfully',
+    type: ConsentOutputDto,
+  })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Forbidden - No permission to view this consent',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Consent not found' })
   findOne(@Param('id') id: string): Promise<ConsentOutputDto> {
     return this.consentService.findOne(id);
   }
@@ -63,6 +103,19 @@ export class ConsentController {
     summary: 'Update consent (extend expiry or modify scope)',
     description: 'Patient can modify own consents. Admin for emergency extensions.',
   })
+  @ApiParam({ name: 'id', description: 'Consent MongoDB ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Consent updated successfully',
+    type: ConsentOutputDto,
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid update data' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Forbidden - Cannot modify other consents',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Consent not found' })
   update(@Param('id') id: string, @Body() dto: UpdateConsentDto): Promise<ConsentOutputDto> {
     return this.consentService.update(id, dto);
   }
@@ -76,7 +129,7 @@ export class ConsentController {
       'Hospital admin requests OTP to approve emergency access. OTP sent to registered email/phone.',
   })
   @ApiResponse({
-    status: 200,
+    status: HttpStatus.OK,
     description: 'OTP sent successfully',
     schema: {
       properties: {
@@ -88,6 +141,9 @@ export class ConsentController {
       },
     },
   })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid admin ID' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden - Admin role required' })
   async requestEmergencyOtp(@Body('adminId') adminId: string) {
     return this.consentService.requestEmergencyOtp(adminId);
   }
@@ -100,7 +156,7 @@ export class ConsentController {
     description: 'Validates OTP before allowing emergency access creation.',
   })
   @ApiResponse({
-    status: 200,
+    status: HttpStatus.OK,
     description: 'OTP verified successfully',
     schema: {
       properties: {
@@ -109,6 +165,9 @@ export class ConsentController {
       },
     },
   })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid or expired OTP' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden - Admin role required' })
   async verifyEmergencyOtp(@Body('adminId') adminId: string, @Body('otp') otp: string) {
     const verified = await this.consentService.verifyEmergencyOtp(adminId, otp);
     return {
@@ -128,10 +187,13 @@ export class ConsentController {
       'All emergency overrides are logged in audit trail for compliance.',
   })
   @ApiResponse({
-    status: 201,
+    status: HttpStatus.CREATED,
     description: 'Emergency consent created successfully',
     type: ConsentOutputDto,
   })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid data or OTP not verified' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Forbidden - Admin role required' })
   async createEmergencyOverride(
     @Body() dto: EmergencyConsentOverrideDto,
   ): Promise<ConsentOutputDto> {
@@ -145,6 +207,17 @@ export class ConsentController {
     summary: 'Revoke consent',
     description: 'Patient can revoke anytime. SuperAdmin for legal compliance.',
   })
+  @ApiParam({ name: 'id', description: 'Consent MongoDB ID' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Consent revoked successfully',
+  })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Forbidden - Cannot revoke other consents',
+  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Consent not found' })
   remove(@Param('id') id: string): Promise<void> {
     return this.consentService.remove(id);
   }

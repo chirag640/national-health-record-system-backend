@@ -25,19 +25,18 @@ export class NotificationProducer {
    */
   async scheduleFollowUpReminder(data: FollowUpReminderJob) {
     const delay = this.queueConfig.calculateDelay(data.reminderDate);
-    
+
     const job = await this.notificationQueue.add(
       'follow-up-reminder',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.HIGH,
-        'critical',
-        delay,
-        { jobId: `reminder-${data.appointmentId}` },
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.HIGH, 'critical', delay, {
+        jobId: `reminder-${data.appointmentId}`,
+      }),
     );
 
-    this.logger.log(`Scheduled follow-up reminder job ${job.id} for appointment ${data.appointmentId}`);
+    this.logger.log(
+      `Scheduled follow-up reminder job ${job.id} for appointment ${data.appointmentId}`,
+    );
     return job;
   }
 
@@ -45,9 +44,10 @@ export class NotificationProducer {
    * Send push notification to user
    */
   async sendPushNotification(data: PushNotificationJob) {
-    const priority = data.priority === 'high' 
-      ? this.queueConfig.PRIORITY.CRITICAL 
-      : this.queueConfig.PRIORITY.NORMAL;
+    const priority =
+      data.priority === 'high'
+        ? this.queueConfig.PRIORITY.CRITICAL
+        : this.queueConfig.PRIORITY.NORMAL;
 
     const job = await this.notificationQueue.add(
       'push-notification',
@@ -66,10 +66,7 @@ export class NotificationProducer {
     const job = await this.notificationQueue.add(
       'email-notification',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.NORMAL,
-        'standard',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.NORMAL, 'standard'),
     );
 
     this.logger.log(`Queued email job ${job.id} to ${data.to}`);
@@ -83,10 +80,7 @@ export class NotificationProducer {
     const job = await this.notificationQueue.add(
       'sms-notification',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.HIGH,
-        'critical',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.HIGH, 'critical'),
     );
 
     this.logger.log(`Queued SMS job ${job.id} to ${data.phoneNumber}`);
@@ -97,9 +91,8 @@ export class NotificationProducer {
    * Send bulk notifications to multiple users
    */
   async sendBulkNotification(data: BulkNotificationJob) {
-    const priority = data.priority === 'high'
-      ? this.queueConfig.PRIORITY.HIGH
-      : this.queueConfig.PRIORITY.LOW;
+    const priority =
+      data.priority === 'high' ? this.queueConfig.PRIORITY.HIGH : this.queueConfig.PRIORITY.LOW;
 
     const job = await this.notificationQueue.add(
       'bulk-notification',
@@ -116,13 +109,13 @@ export class NotificationProducer {
    */
   async cancelScheduledNotification(jobId: string) {
     const job = await this.notificationQueue.getJob(jobId);
-    
+
     if (job) {
       await job.remove();
       this.logger.log(`Cancelled notification job ${jobId}`);
       return true;
     }
-    
+
     return false;
   }
 
@@ -131,7 +124,7 @@ export class NotificationProducer {
    */
   async getJobStatus(jobId: string) {
     const job = await this.notificationQueue.getJob(jobId);
-    
+
     if (!job) {
       return null;
     }

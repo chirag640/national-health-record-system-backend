@@ -1,9 +1,9 @@
 {
   "info": {
     "name": "National Health Record System API",
-    "description": "Patient-centric EHR platform for patients, doctors, and government hospitals with consent control, secure document storage, offline sync, and audit logging.\n\n## 🚀 Quick Start\n\n### 1. Setup Database (First Time Only)\n```bash\nnpm run seed\n```\n\n### 2. Login to Get Authorization Token\nUse the **\"Login (Default Admin) ⭐\"** request in the Auth folder with these credentials:\n- **Email:** admin@national-health-record-system.com\n- **Password:** Admin@123456\n- **Role:** Patient\n\n### 3. Token is Auto-Saved!\nThe access token is automatically saved to the `{{accessToken}}` variable and used for all authenticated requests.\n\n## 📋 API Endpoint Structure\n- **Auth endpoints:** `/api/auth/*` (no version)\n- **All other endpoints:** `/api/v1/*` (versioned)\n\n## 🔐 Valid Role Values\n- `Patient` - for patient users\n- `Doctor` - for doctor users\n- `HospitalAdmin` - for hospital administrators\n- `SuperAdmin` - for super administrators",
+    "description": "Patient-centric EHR platform for patients, doctors, and government hospitals with consent control, secure document storage, offline sync, and audit logging.\n\n## \ud83d\ude80 Quick Start\n\n### 1. Setup Database (First Time Only)\n```bash\nnpm run seed\n```\n\n### 2. Login to Get Authorization Token\nUse the **\"Login (Default Admin) \u2b50\"** request in the Auth folder with these credentials:\n- **Email:** admin@national-health-record-system.com\n- **Password:** Admin@123456\n- **Role:** Patient\n\n### 3. Token is Auto-Saved!\nThe access token is automatically saved to the `{{accessToken}}` variable and used for all authenticated requests.\n\n## \ud83d\udccb API Endpoint Structure\n- **Auth endpoints:** `/api/auth/*` (no version)\n- **All other endpoints:** `/api/v1/*` (versioned)\n\n## \ud83d\udd10 Valid Role Values\n- `Patient` - for patient users\n- `Doctor` - for doctor users\n- `HospitalAdmin` - for hospital administrators\n- `SuperAdmin` - for super administrators\n\n## \u2728 Version 2.0.0 Updates\n- Added Billing module (12 endpoints)\n- Added Appointments (8 endpoints)\n- Added Medical History (20+ endpoints)\n- Added Lab Reports (11 endpoints)\n- Added Telemedicine (14 endpoints)\n- Enhanced P0 critical fix testing",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "auth": {
     "type": "bearer",
@@ -67,6 +67,36 @@
       "key": "encounterId",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "invoiceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "paymentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "appointmentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "allergyId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "labReportId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "telemedicineSessionId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -96,7 +126,7 @@
                   "    if (response.accessToken) {",
                   "        pm.collectionVariables.set('accessToken', response.accessToken);",
                   "        pm.collectionVariables.set('refreshToken', response.refreshToken);",
-                  "        console.log('✅ Patient registered and tokens saved');",
+                  "        console.log('\u2705 Patient registered and tokens saved');",
                   "    }",
                   "}"
                 ],
@@ -157,7 +187,7 @@
           }
         },
         {
-          "name": "Login (Default Admin) ⭐",
+          "name": "Login (Default Admin) \u2b50",
           "event": [
             {
               "listen": "test",
@@ -167,8 +197,8 @@
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('accessToken', response.accessToken);",
                   "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
-                  "    console.log('🔐 Default Admin Login successful - Tokens saved');",
-                  "    console.log('✅ Access Token:', response.accessToken);",
+                  "    console.log('\ud83d\udd10 Default Admin Login successful - Tokens saved');",
+                  "    console.log('\u2705 Access Token:', response.accessToken);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -191,7 +221,7 @@
               "raw": "{\n  \"email\": \"admin@national-health-record-system.com\",\n  \"password\": \"Admin@123456\",\n  \"role\": \"Patient\"\n}"
             },
             "url": "{{baseUrl}}/auth/login",
-            "description": "🔐 DEFAULT ADMIN LOGIN - Use this to get authorization token!\n\nCredentials from seed script:\n- Email: admin@national-health-record-system.com\n- Password: Admin@123456\n- Role: Patient (seeded as Patient role)\n\n⚠️ Run 'npm run seed' first if database is empty!"
+            "description": "\ud83d\udd10 DEFAULT ADMIN LOGIN - Use this to get authorization token!\n\nCredentials from seed script:\n- Email: admin@national-health-record-system.com\n- Password: Admin@123456\n- Role: Patient (seeded as Patient role)\n\n\u26a0\ufe0f Run 'npm run seed' first if database is empty!"
           }
         },
         {
@@ -205,7 +235,7 @@
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('accessToken', response.accessToken);",
                   "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
-                  "    console.log('🔐 Patient Login successful - Tokens saved');",
+                  "    console.log('\ud83d\udd10 Patient Login successful - Tokens saved');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -242,7 +272,7 @@
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('accessToken', response.accessToken);",
                   "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
-                  "    console.log('🔐 Doctor login successful - Tokens saved');",
+                  "    console.log('\ud83d\udd10 Doctor login successful - Tokens saved');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -279,7 +309,7 @@
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('accessToken', response.accessToken);",
                   "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
-                  "    console.log('🔐 Hospital Admin login successful - Tokens saved');",
+                  "    console.log('\ud83d\udd10 Hospital Admin login successful - Tokens saved');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -316,7 +346,7 @@
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('accessToken', response.accessToken);",
                   "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
-                  "    console.log('🔐 Super Admin login successful - Tokens saved');",
+                  "    console.log('\ud83d\udd10 Super Admin login successful - Tokens saved');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -373,7 +403,7 @@
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('accessToken', response.accessToken);",
                   "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
-                  "    console.log('🔐 OTP verified - Tokens saved');",
+                  "    console.log('\ud83d\udd10 OTP verified - Tokens saved');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -428,7 +458,7 @@
                   "if (pm.response.code === 200) {",
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('accessToken', response.accessToken);",
-                  "    console.log('🔄 Access token refreshed');",
+                  "    console.log('\ud83d\udd04 Access token refreshed');",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -536,7 +566,7 @@
                   "    const response = pm.response.json();",
                   "    if (response._id) {",
                   "        pm.collectionVariables.set('patientId', response._id);",
-                  "        console.log('✅ Patient created:', response._id);",
+                  "        console.log('\u2705 Patient created:', response._id);",
                   "    }",
                   "}"
                 ],
@@ -565,8 +595,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrlV1}}/patients?page=1&limit=10",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["patients"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "patients"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -662,7 +696,7 @@
                   "    const response = pm.response.json();",
                   "    if (response._id) {",
                   "        pm.collectionVariables.set('hospitalId', response._id);",
-                  "        console.log('✅ Hospital created:', response._id);",
+                  "        console.log('\u2705 Hospital created:', response._id);",
                   "    }",
                   "}"
                 ],
@@ -691,8 +725,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrlV1}}/hospitals?page=1&limit=10",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["hospitals"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "hospitals"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -755,7 +793,7 @@
                   "    const response = pm.response.json();",
                   "    if (response._id) {",
                   "        pm.collectionVariables.set('doctorId', response._id);",
-                  "        console.log('✅ Doctor created:', response._id);",
+                  "        console.log('\u2705 Doctor created:', response._id);",
                   "    }",
                   "}"
                 ],
@@ -784,8 +822,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrlV1}}/doctors?page=1&limit=10",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["doctors"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "doctors"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -848,7 +890,7 @@
                   "    const response = pm.response.json();",
                   "    if (response._id) {",
                   "        pm.collectionVariables.set('encounterId', response._id);",
-                  "        console.log('✅ Encounter created:', response._id);",
+                  "        console.log('\u2705 Encounter created:', response._id);",
                   "    }",
                   "}"
                 ],
@@ -877,8 +919,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrlV1}}/encounters?page=1&limit=10",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["encounters"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "encounters"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -941,7 +987,7 @@
                   "    const response = pm.response.json();",
                   "    if (response._id) {",
                   "        pm.collectionVariables.set('documentId', response._id);",
-                  "        console.log('✅ Health document created:', response._id);",
+                  "        console.log('\u2705 Health document created:', response._id);",
                   "    }",
                   "}"
                 ],
@@ -970,8 +1016,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/healthdocuments?page=1&limit=10",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["health-documents"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "health-documents"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -1034,7 +1084,7 @@
                   "    const response = pm.response.json();",
                   "    if (response._id) {",
                   "        pm.collectionVariables.set('consentId', response._id);",
-                  "        console.log('✅ Consent created:', response._id);",
+                  "        console.log('\u2705 Consent created:', response._id);",
                   "    }",
                   "}"
                 ],
@@ -1063,8 +1113,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrlV1}}/consents?page=1&limit=10",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["consents"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "consents"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -1194,8 +1248,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrl}}/auditlogs?page=1&limit=10",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["audit-logs"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "audit-logs"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -1255,8 +1313,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrlV1}}/sync/pending?deviceId=device-123-abc-456&userId={{doctorId}}",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["sync", "pending"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "sync",
+                "pending"
+              ],
               "query": [
                 {
                   "key": "deviceId",
@@ -1285,8 +1348,14 @@
             "method": "PATCH",
             "url": {
               "raw": "{{baseUrlV1}}/sync/resolve/{{syncQueueId}}?resolution=CLIENT_WINS",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["sync", "resolve", "{{syncQueueId}}"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "sync",
+                "resolve",
+                "{{syncQueueId}}"
+              ],
               "query": [
                 {
                   "key": "resolution",
@@ -1304,8 +1373,13 @@
             "method": "POST",
             "url": {
               "raw": "{{baseUrlV1}}/sync/retry?deviceId=device-123-abc-456&userId={{doctorId}}",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["sync", "retry"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "sync",
+                "retry"
+              ],
               "query": [
                 {
                   "key": "deviceId",
@@ -1326,8 +1400,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrlV1}}/sync/stats?userId={{doctorId}}",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["sync", "stats"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "sync",
+                "stats"
+              ],
               "query": [
                 {
                   "key": "userId",
@@ -1345,8 +1424,13 @@
             "method": "DELETE",
             "url": {
               "raw": "{{baseUrlV1}}/sync/cleanup?days=30",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["sync", "cleanup"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "sync",
+                "cleanup"
+              ],
               "query": [
                 {
                   "key": "days",
@@ -1405,8 +1489,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrlV1}}/notifications?page=1&limit=20&status=sent&priority=high",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["notifications"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "notifications"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -1447,8 +1535,14 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrlV1}}/notifications/me/unread?limit=50",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["notifications", "me", "unread"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "notifications",
+                "me",
+                "unread"
+              ],
               "query": [
                 {
                   "key": "limit",
@@ -1635,8 +1729,14 @@
             "method": "POST",
             "url": {
               "raw": "{{baseUrlV1}}/notifications/admin/cleanup?daysOld=90",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["notifications", "admin", "cleanup"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "notifications",
+                "admin",
+                "cleanup"
+              ],
               "query": [
                 {
                   "key": "daysOld",
@@ -1680,7 +1780,7 @@
                   "    const response = pm.response.json();",
                   "    if (response.data && response.data._id) {",
                   "        pm.collectionVariables.set('prescriptionId', response.data._id);",
-                  "        console.log('✅ Prescription ID saved:', response.data._id);",
+                  "        console.log('\u2705 Prescription ID saved:', response.data._id);",
                   "    }",
                   "}"
                 ],
@@ -1695,8 +1795,12 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrlV1}}/prescriptions?page=1&limit=20&status=active",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["prescriptions"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "prescriptions"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -1739,7 +1843,7 @@
           "request": {
             "method": "GET",
             "url": "{{baseUrlV1}}/prescriptions/patient/{{patientId}}/needing-refill",
-            "description": "Get prescriptions that need refill (≤1 refill remaining)"
+            "description": "Get prescriptions that need refill (\u22641 refill remaining)"
           }
         },
         {
@@ -1764,8 +1868,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrlV1}}/prescriptions/expiring?days=7",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["prescriptions", "expiring"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "prescriptions",
+                "expiring"
+              ],
               "query": [
                 {
                   "key": "days",
@@ -1783,8 +1892,13 @@
             "method": "GET",
             "url": {
               "raw": "{{baseUrlV1}}/prescriptions/search?medication=Amoxicillin",
-              "host": ["{{baseUrlV1}}"],
-              "path": ["prescriptions", "search"],
+              "host": [
+                "{{baseUrlV1}}"
+              ],
+              "path": [
+                "prescriptions",
+                "search"
+              ],
               "query": [
                 {
                   "key": "medication",
@@ -1879,6 +1993,277 @@
             "method": "DELETE",
             "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}",
             "description": "Delete prescription (soft delete, only draft/entered-in-error) (Doctor, Super Admin only)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Billing \ud83d\udcb0",
+      "item": [
+        {
+          "name": "Create Invoice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data._id) {",
+                  "        pm.collectionVariables.set('invoiceId', response.data._id);",
+                  "        console.log('\u2705 Invoice created:', response.data._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"hospitalId\": \"{{hospitalId}}\",\n  \"status\": \"draft\",\n  \"items\": [{\"description\": \"Consultation\", \"quantity\": 1, \"unitPrice\": 500, \"amount\": 500}],\n  \"subtotal\": 500,\n  \"taxAmount\": 90,\n  \"totalAmount\": 590,\n  \"currency\": \"INR\"\n}"
+            },
+            "url": "{{baseUrl}}/billing/invoices"
+          }
+        },
+        {
+          "name": "Get All Invoices",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/billing/invoices?page=1&limit=10"
+          }
+        },
+        {
+          "name": "Download Invoice PDF \u2b50 (P0)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/billing/invoices/{{invoiceId}}/download",
+            "description": "\ud83c\udfaf P0 CRITICAL: Professional invoice PDF with GST"
+          }
+        },
+        {
+          "name": "Create Payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data._id) {",
+                  "        pm.collectionVariables.set('paymentId', response.data._id);",
+                  "        console.log('\u2705 Payment created');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"invoiceId\": \"{{invoiceId}}\",\n  \"patientId\": \"{{patientId}}\",\n  \"amount\": 590,\n  \"currency\": \"INR\",\n  \"paymentMethod\": \"upi\",\n  \"status\": \"completed\"\n}"
+            },
+            "url": "{{baseUrl}}/billing/payments"
+          }
+        },
+        {
+          "name": "Send Receipt Email \u2b50 (P0)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patient@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/billing/payments/{{paymentId}}/send-receipt",
+            "description": "\ud83c\udfaf P0 CRITICAL: Send HTML receipt email"
+          }
+        },
+        {
+          "name": "Get Payment Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/billing/stats"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Appointments \ud83d\udcc5",
+      "item": [
+        {
+          "name": "Create Appointment \u2b50",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('appointmentId', pm.response.json().data?._id);",
+                  "    console.log('\u2705 Appointment created');",
+                  "}",
+                  "if (pm.response.code === 409) {",
+                  "    console.log('\u2705 P0: Overbooking prevented!');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"doctorId\": \"{{doctorId}}\",\n  \"startTime\": \"2025-12-15T10:00:00Z\",\n  \"endTime\": \"2025-12-15T10:30:00Z\",\n  \"type\": \"consultation\",\n  \"status\": \"scheduled\"\n}"
+            },
+            "url": "{{baseUrlV1}}/appointments",
+            "description": "\ud83c\udfaf P0 TEST: Try same time twice for overbooking test"
+          }
+        },
+        {
+          "name": "Get All Appointments",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/appointments"
+          }
+        },
+        {
+          "name": "Check Availability",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/appointments/availability?doctorId={{doctorId}}&date=2025-12-15"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lab Reports \ud83e\uddea",
+      "item": [
+        {
+          "name": "Create Lab Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"testCategory\": \"blood\",\n  \"testName\": \"CBC\",\n  \"testDate\": \"2025-12-11T10:00:00Z\",\n  \"status\": \"completed\",\n  \"results\": [{\"parameterName\": \"Hemoglobin\", \"value\": \"14.5\", \"unit\": \"g/dL\", \"normalRange\": \"13-17\", \"status\": \"normal\"}]\n}"
+            },
+            "url": "{{baseUrl}}/lab-reports"
+          }
+        },
+        {
+          "name": "Get Lab Reports",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/lab-reports"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Medical History \ud83d\udccb",
+      "item": [
+        {
+          "name": "Create Allergy",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"allergen\": \"Penicillin\",\n  \"type\": \"medication\",\n  \"severity\": \"severe\",\n  \"reaction\": \"Anaphylaxis\"\n}"
+            },
+            "url": "{{baseUrl}}/medical-history/allergies"
+          }
+        },
+        {
+          "name": "Get Critical Allergies",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/medical-history/allergies/patient/{{patientId}}/critical"
+          }
+        },
+        {
+          "name": "Record Vital Signs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"bloodPressure\": {\"systolic\": 120, \"diastolic\": 80},\n  \"heartRate\": 72,\n  \"temperature\": 98.6\n}"
+            },
+            "url": "{{baseUrl}}/medical-history/vital-signs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Telemedicine \ud83d\udcf9",
+      "item": [
+        {
+          "name": "Create Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"doctorId\": \"{{doctorId}}\",\n  \"sessionType\": \"video\",\n  \"scheduledAt\": \"2025-12-15T14:00:00Z\"\n}"
+            },
+            "url": "{{baseUrl}}/telemedicine"
+          }
+        },
+        {
+          "name": "Get All Sessions",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/telemedicine"
           }
         }
       ]

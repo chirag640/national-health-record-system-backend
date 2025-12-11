@@ -14,6 +14,8 @@ import { EmergencyConsentOverrideDto } from './dto/emergency-consent-override.dt
 import { PaginatedResponse, createPaginatedResponse } from '../../pagination.dto';
 import { User, UserRole } from '../../auth/schemas/user.schema';
 import { Consent } from './schemas/consent.schema';
+import { EmailService } from '../../email/email.service';
+import { SmsService } from '../notification/services/sms.service';
 
 @Injectable()
 export class ConsentService {
@@ -21,6 +23,8 @@ export class ConsentService {
     private readonly consentRepository: ConsentRepository,
     @InjectModel(User.name) private userModel: Model<User>,
     @InjectModel(Consent.name) private consentModel: Model<Consent>,
+    private readonly emailService: EmailService,
+    private readonly smsService: SmsService,
   ) {}
 
   async create(dto: CreateConsentDto): Promise<ConsentOutputDto> {
@@ -144,12 +148,27 @@ export class ConsentService {
       emergencyOtpExpiresAt: expiresAt,
     });
 
-    // TODO: Send OTP via email/SMS using EmailService or SMS service
-    // For now, return OTP in response (remove in production)
+    // Send OTP via Email (primary channel)
+    try {
+      await this.emailService.sendOtp(admin.email, admin.email, otp, 10);
+    } catch (error) {
+      // Log error but continue - we'll try SMS
+      console.error('Failed to send OTP via email:', error);
+    }
+
+    // Send OTP via SMS if phone number is available (backup channel)
+    if ((admin as any).phone) {
+      try {
+        await this.smsService.sendOtp((admin as any).phone, otp, 10);
+      } catch (error) {
+        // Log error but don't fail the request
+        console.error('Failed to send OTP via SMS:', error);
+      }
+    }
+
     return {
-      message: `OTP sent to ${admin.email}. Valid for 10 minutes.`,
+      message: `OTP sent to ${admin.email}${(admin as any).phone ? ' and phone' : ''}. Valid for 10 minutes.`,
       expiresAt,
-      // otp, // Remove this in production - only for testing
     };
   }
 

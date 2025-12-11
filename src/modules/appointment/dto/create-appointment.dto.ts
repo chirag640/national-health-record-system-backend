@@ -103,7 +103,9 @@ export class CreateAppointmentDto {
     maxLength: 500,
   })
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
   })
@@ -121,7 +123,9 @@ export class CreateAppointmentDto {
   })
   @IsOptional()
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
   })
@@ -137,7 +141,9 @@ export class CreateAppointmentDto {
   })
   @IsOptional()
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
   })
@@ -153,7 +159,9 @@ export class CreateAppointmentDto {
   })
   @IsOptional()
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
   })

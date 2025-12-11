@@ -80,7 +80,7 @@ async function seed() {
     console.log('   1. Start the application: npm run start:dev');
     console.log('   2. Login with admin credentials');
     console.log('   3. Test the API endpoints: http://localhost:3000/api\\n');
-  } catch (error) {
+  } catch (error: any) {
     const err = error as Error;
     console.error('\\n❌ Seeding failed:', err.message);
     console.error(err.stack);
@@ -99,4 +99,4 @@ if (process.argv.includes('--reset')) {
   // For now, just proceed with seeding
 }
 
-seed();
+void seed();

@@ -14,8 +14,12 @@ export class UpdateHospitalDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
   })
@@ -34,8 +38,12 @@ export class UpdateHospitalDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
   })
@@ -54,8 +62,12 @@ export class UpdateHospitalDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
   })
@@ -72,8 +84,12 @@ export class UpdateHospitalDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     return value;
   })
   @IsIn(['Government', 'Private'])
@@ -87,8 +103,12 @@ export class UpdateHospitalDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     return value;
   })
   @IsBoolean()

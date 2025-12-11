@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   HealthCheck,
   HealthCheckService,
@@ -7,6 +8,7 @@ import {
   DiskHealthIndicator,
 } from '@nestjs/terminus';
 
+@ApiTags('Health')
 @Controller('health')
 export class HealthController {
   constructor(
@@ -18,6 +20,24 @@ export class HealthController {
 
   @Get()
   @HealthCheck()
+  @ApiOperation({
+    summary: 'Health check endpoint',
+    description:
+      'Checks database, memory, and disk health. Used by load balancers and monitoring systems.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'System healthy',
+    schema: {
+      properties: {
+        status: { type: 'string', example: 'ok' },
+        info: { type: 'object' },
+        error: { type: 'object' },
+        details: { type: 'object' },
+      },
+    },
+  })
+  @ApiResponse({ status: 503, description: 'Service unavailable - health check failed' })
   check() {
     return this.health.check([
       // Database health check

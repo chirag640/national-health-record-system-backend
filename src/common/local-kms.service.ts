@@ -120,7 +120,7 @@ export class LocalKmsService {
         plaintextKey: new Uint8Array(plaintextDek),
         encryptedKey: new Uint8Array(combined),
       };
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logger.error('Failed to generate local data key', err.stack);
       throw new Error(`Local key generation failed: ${err.message}`);
@@ -154,7 +154,7 @@ export class LocalKmsService {
       plaintextDek = Buffer.concat([plaintextDek, decipher.final()]);
 
       return new Uint8Array(plaintextDek);
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logger.error('Failed to decrypt local key', err.stack);
       throw new Error(`Local key decryption failed: ${err.message}`);
@@ -193,7 +193,7 @@ export class LocalKmsService {
 
       // Verify decrypted key matches original
       return Buffer.from(plaintextKey).equals(Buffer.from(decrypted));
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logger.error('Local KMS health check failed', err.stack);
       return false;

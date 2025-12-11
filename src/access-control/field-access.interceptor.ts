@@ -60,7 +60,9 @@ export class FieldAccessInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data) => {
         // Skip if no data
-        if (!data) return data;
+        if (!data) {
+          return data;
+        }
 
         // Create audit log function
         const auditLog = (message: string) => {
@@ -127,7 +129,9 @@ export class FieldAccessInterceptor implements NestInterceptor {
    * Apply custom deny rules
    */
   private applyCustomDeny(data: any, denyFields: string[]): any {
-    if (!data || typeof data !== 'object') return data;
+    if (!data || typeof data !== 'object') {
+      return data;
+    }
 
     const cloned = JSON.parse(JSON.stringify(data));
 

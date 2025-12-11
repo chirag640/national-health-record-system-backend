@@ -68,7 +68,7 @@ export function encryptAES(plaintext: string, key: Buffer): EncryptedData {
       iv: iv.toString('base64'),
       tag: authTag.toString('base64'),
     };
-  } catch (error) {
+  } catch (error: any) {
     const err = error as Error;
     throw new Error(`Encryption failed: ${err.message}`);
   }
@@ -116,7 +116,7 @@ export function decryptAES(data: EncryptedData, key: Buffer): string {
     plaintext += decipher.final('utf8');
 
     return plaintext;
-  } catch (error) {
+  } catch (error: any) {
     const err = error as Error;
     // Auth tag mismatch means data was tampered with
     if (err.message.includes('Unsupported state or unable to authenticate data')) {

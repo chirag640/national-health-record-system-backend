@@ -163,7 +163,7 @@ export class PatientIdCardService {
 
         // Finalize PDF
         doc.end();
-      } catch (error) {
+      } catch (error: any) {
         reject(error);
       }
     });

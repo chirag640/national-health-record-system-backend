@@ -77,7 +77,7 @@ import { redisStore } from 'cache-manager-ioredis-yet';
           return {
             store,
           } as any;
-        } catch (error) {
+        } catch (error: any) {
           const err = error as Error;
           logger.error(`Failed to initialize Redis: ${err.message}`);
           logger.warn('⚠️  Falling back to in-memory cache');

@@ -108,7 +108,7 @@ export class EncryptionInterceptor implements NestInterceptor {
         } else {
           request.body = await this.encryptionService.encryptRecord(request.body, sensitiveFields);
         }
-      } catch (error) {
+      } catch (error: any) {
         const err = error as Error;
         this.logger.error('Failed to encrypt request body', err.stack);
         throw error;
@@ -129,7 +129,7 @@ export class EncryptionInterceptor implements NestInterceptor {
             return await this.encryptionService.decryptRecord(data, sensitiveFields);
           }
           return data;
-        } catch (error) {
+        } catch (error: any) {
           const err = error as Error;
           this.logger.error('Failed to decrypt response data', err.stack);
           throw error;

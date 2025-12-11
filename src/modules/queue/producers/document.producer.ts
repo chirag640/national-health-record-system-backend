@@ -29,10 +29,7 @@ export class DocumentProducer {
     const job = await this.documentQueue.add(
       'document-upload',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.HIGH,
-        'critical',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.HIGH, 'critical'),
     );
 
     this.logger.log(`Queued document upload job ${job.id} for file ${data.filename}`);
@@ -46,10 +43,7 @@ export class DocumentProducer {
     const job = await this.documentQueue.add(
       'document-checksum',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.NORMAL,
-        'standard',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.NORMAL, 'standard'),
     );
 
     this.logger.log(`Queued checksum job ${job.id} for file ${data.fileId}`);
@@ -63,10 +57,7 @@ export class DocumentProducer {
     const job = await this.documentQueue.add(
       'document-versioning',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.NORMAL,
-        'standard',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.NORMAL, 'standard'),
     );
 
     this.logger.log(`Queued versioning job ${job.id} for document ${data.fileId}`);
@@ -80,10 +71,7 @@ export class DocumentProducer {
     const job = await this.documentQueue.add(
       'document-s3-upload',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.HIGH,
-        'critical',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.HIGH, 'critical'),
     );
 
     this.logger.log(`Queued S3 upload job ${job.id} for document ${data.fileId}`);
@@ -97,10 +85,7 @@ export class DocumentProducer {
     const job = await this.documentQueue.add(
       'document-cleanup',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.LOW,
-        'background',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.LOW, 'background'),
     );
 
     this.logger.log(`Queued cleanup job ${job.id} for document ${data.fileId}`);
@@ -114,10 +99,7 @@ export class DocumentProducer {
     const job = await this.documentQueue.add(
       'document-thumbnail',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.NORMAL,
-        'standard',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.NORMAL, 'standard'),
     );
 
     this.logger.log(`Queued thumbnail job ${job.id} for document ${data.fileId}`);
@@ -131,10 +113,7 @@ export class DocumentProducer {
     const job = await this.documentQueue.add(
       'document-ocr',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.LOW,
-        'background',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.LOW, 'background'),
     );
 
     this.logger.log(`Queued OCR job ${job.id} for document ${data.fileId}`);
@@ -146,7 +125,7 @@ export class DocumentProducer {
    */
   async getJobStatus(jobId: string) {
     const job = await this.documentQueue.getJob(jobId);
-    
+
     if (!job) {
       return null;
     }

@@ -32,6 +32,10 @@ export enum NotificationType {
   ENCOUNTER_CREATED = 'encounter_created',
   ENCOUNTER_UPDATED = 'encounter_updated',
 
+  SESSION_SCHEDULED = 'session_scheduled',
+  SESSION_COMPLETED = 'session_completed',
+  SESSION_CANCELLED = 'session_cancelled',
+
   SYSTEM_ALERT = 'system_alert',
   SYSTEM_MAINTENANCE = 'system_maintenance',
   SECURITY_ALERT = 'security_alert',
@@ -201,6 +205,7 @@ export class Notification {
       'Encounter',
       'HealthDocument',
       'Consent',
+      'TelemedicineSession',
     ],
   })
   relatedEntityModel?: string;
@@ -316,7 +321,9 @@ NotificationSchema.index({ groupKey: 1, recipientId: 1 }); // For grouping
 
 // Virtual for checking if expired
 NotificationSchema.virtual('isExpired').get(function (this: NotificationDocument) {
-  if (!this.expiresAt) return false;
+  if (!this.expiresAt) {
+    return false;
+  }
   return new Date() > this.expiresAt;
 });
 

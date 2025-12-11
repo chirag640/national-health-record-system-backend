@@ -1,5 +1,12 @@
 import { Controller, Post, Get, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { S3LifecycleService } from './s3-lifecycle.service';
 import {
   RequestPresignedUploadDto,
@@ -26,6 +33,7 @@ export class FileUploadController {
   })
   @ApiResponse({ status: 201, description: 'Presigned URL generated successfully' })
   @ApiResponse({ status: 400, description: 'Invalid file parameters' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getPresignedUploadUrl(@Body() dto: RequestPresignedUploadDto) {
     return this.s3Service.getPresignedUploadUrl(
       dto.filename,
@@ -49,6 +57,7 @@ export class FileUploadController {
   })
   @ApiResponse({ status: 200, description: 'Upload completed successfully' })
   @ApiResponse({ status: 400, description: 'File not found or invalid' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async completeUpload(@Body() dto: CompleteUploadDto) {
     const pathParts = dto.storagePath.split('/');
     const entityId = (pathParts.length > 2 ? pathParts[2] : 'unknown') as string;
@@ -63,8 +72,15 @@ export class FileUploadController {
     summary: 'Get presigned download URL',
     description: 'Returns a presigned URL for secure file download',
   })
+  @ApiParam({ name: 'fileId', description: 'File unique identifier' })
+  @ApiQuery({
+    name: 'expiresIn',
+    required: false,
+    description: 'URL expiry in seconds (default: 300)',
+  })
   @ApiResponse({ status: 200, description: 'Presigned download URL generated' })
   @ApiResponse({ status: 404, description: 'File not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getPresignedDownloadUrl(
     @Param('fileId') fileId: string,
     @Query('expiresIn') expiresIn?: number,
@@ -85,8 +101,10 @@ export class FileUploadController {
     summary: 'Delete file',
     description: 'Permanently deletes file from S3',
   })
+  @ApiParam({ name: 'fileId', description: 'File unique identifier' })
   @ApiResponse({ status: 200, description: 'File deleted successfully' })
   @ApiResponse({ status: 404, description: 'File not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async deleteFile(@Param('fileId') fileId: string, @Body() dto: DeleteFileDto) {
     // In real implementation, fetch storagePath from database using fileId
     const storagePath = `documents/worker/${fileId}`;
@@ -108,7 +126,10 @@ export class FileUploadController {
     summary: 'List files by entity',
     description: 'Returns all files associated with an entity (worker, visit, etc)',
   })
+  @ApiParam({ name: 'entityType', description: 'Entity type (patient, doctor, encounter, etc.)' })
+  @ApiParam({ name: 'entityId', description: 'Entity MongoDB ID' })
   @ApiResponse({ status: 200, description: 'Files retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async listFilesByEntity(
     @Param('entityType') entityType: string,
     @Param('entityId') entityId: string,
@@ -132,7 +153,13 @@ export class FileUploadController {
     summary: 'Cleanup temp files',
     description: 'Manually cleanup temp files older than specified hours (admin only)',
   })
+  @ApiQuery({
+    name: 'olderThanHours',
+    required: false,
+    description: 'Delete temp files older than N hours (default: 24)',
+  })
   @ApiResponse({ status: 200, description: 'Cleanup completed' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async cleanupTempFiles(@Query('olderThanHours') olderThanHours?: number) {
     const deletedCount = await this.s3Service.cleanupTempFiles(olderThanHours || 24);
 

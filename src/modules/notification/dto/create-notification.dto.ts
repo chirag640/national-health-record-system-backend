@@ -145,6 +145,7 @@ export class CreateNotificationDto {
       'Encounter',
       'HealthDocument',
       'Consent',
+      'TelemedicineSession',
     ],
   })
   @IsOptional()

@@ -46,7 +46,9 @@ export class CreateHealthDocumentDto {
     maxLength: 255,
   })
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     // Sanitize HTML to prevent XSS attacks
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
@@ -63,7 +65,9 @@ export class CreateHealthDocumentDto {
     maxLength: 2000,
   })
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     // Sanitize HTML to prevent XSS attacks
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
@@ -81,8 +85,12 @@ export class CreateHealthDocumentDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     return value;
   })
   @IsObject()

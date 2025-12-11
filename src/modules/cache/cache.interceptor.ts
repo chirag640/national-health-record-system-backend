@@ -49,7 +49,7 @@ export class HttpCacheInterceptor implements NestInterceptor {
       tap(async (response) => {
         try {
           await this.cacheManager.set(cacheKey, response, CACHE_TTL * 1000); // Convert to ms for v5
-        } catch (error) {
+        } catch (error: any) {
           const err = error as Error;
           console.error(`Failed to cache response for ${cacheKey}:`, err.message);
         }

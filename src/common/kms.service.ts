@@ -144,7 +144,7 @@ export class KmsService {
         plaintextKey: response.Plaintext,
         encryptedKey: response.CiphertextBlob,
       };
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logger.error('Failed to generate data key from AWS KMS', err.stack);
       throw new Error(`AWS KMS key generation failed: ${err.message}`);
@@ -188,7 +188,7 @@ export class KmsService {
       }
 
       return response.Plaintext;
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logger.error('Failed to decrypt key with AWS KMS', err.stack);
       throw new Error(`AWS KMS decryption failed: ${err.message}`);
@@ -232,7 +232,7 @@ export class KmsService {
       // Test AWS KMS connectivity by generating a test key
       await this.generateDataKey();
       return true;
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logger.error('Encryption health check failed', err.stack);
       return false;

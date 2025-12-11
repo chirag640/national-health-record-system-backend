@@ -14,35 +14,26 @@ export class HospitalRepository extends BaseRepository<HospitalDocument> {
     super(hospitalModel, connection);
   }
 
-  async create(data: Partial<Hospital>): Promise<Hospital> {
+  async create(data: Partial<HospitalDocument>): Promise<HospitalDocument> {
     const created = new this.hospitalModel(data);
-    const saved = await created.save();
-    return saved.toObject() as Hospital;
+    return await created.save();
   }
 
-  async findAll(skip: number = 0, limit: number = 10): Promise<Hospital[]> {
-    return this.hospitalModel
-      .find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 }) // Most recent first
-      .lean()
-      .exec() as Promise<Hospital[]>;
+  async findAll(skip: number = 0, limit: number = 10): Promise<HospitalDocument[]> {
+    return this.hospitalModel.find().skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
   }
 
-  async findById(id: string): Promise<Hospital | null> {
-    return this.hospitalModel.findById(id).lean().exec() as Promise<Hospital | null>;
+  async findById(id: string): Promise<HospitalDocument | null> {
+    return this.hospitalModel.findById(id).exec();
   }
 
-  async update(id: string, data: Partial<Hospital>): Promise<Hospital | null> {
-    return this.hospitalModel
-      .findByIdAndUpdate(id, data, { new: true })
-      .lean()
-      .exec() as Promise<Hospital | null>;
+  async update(id: string, data: Partial<HospitalDocument>): Promise<HospitalDocument | null> {
+    return this.hospitalModel.findByIdAndUpdate(id, data, { new: true }).exec();
   }
 
-  async delete(id: string): Promise<Hospital | null> {
-    return this.hospitalModel.findByIdAndDelete(id).lean().exec() as Promise<Hospital | null>;
+  async delete(id: string): Promise<boolean> {
+    const result = await this.hospitalModel.findByIdAndDelete(id).exec();
+    return !!result;
   }
 
   async count(): Promise<number> {

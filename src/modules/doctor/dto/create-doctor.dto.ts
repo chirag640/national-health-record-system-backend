@@ -28,7 +28,9 @@ export class CreateDoctorDto {
     maxLength: 50,
   })
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     // Sanitize HTML to prevent XSS attacks
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
@@ -46,7 +48,9 @@ export class CreateDoctorDto {
     maxLength: 20,
   })
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     // Sanitize HTML to prevent XSS attacks
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
@@ -67,8 +71,12 @@ export class CreateDoctorDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     // Sanitize HTML to prevent XSS attacks
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
@@ -89,8 +97,12 @@ export class CreateDoctorDto {
   })
   @IsOptional()
   @Transform(({ value }) => {
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim().toUpperCase(); // Normalize to uppercase
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
   })

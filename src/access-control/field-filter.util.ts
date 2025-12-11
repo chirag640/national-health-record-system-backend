@@ -37,7 +37,9 @@ export function filterFields(role: string, resource: any, options: FilterOptions
   const { userId, logDenied = false, auditLog } = options;
 
   // Handle null/undefined
-  if (!resource) return resource;
+  if (!resource) {
+    return resource;
+  }
 
   // Get policy for this role
   const policy = getFieldAccessPolicy(role);
@@ -56,7 +58,7 @@ export function filterFields(role: string, resource: any, options: FilterOptions
   }
 
   // Deep clone to avoid mutating original
-  let result = JSON.parse(JSON.stringify(resource));
+  const result = JSON.parse(JSON.stringify(resource));
 
   // Collect all field paths in the object
   const allFieldPaths = collectFieldPaths(result);
@@ -92,7 +94,9 @@ export function filterFieldsArray(
   resources: any[],
   options: FilterOptions = {},
 ): any[] {
-  if (!Array.isArray(resources)) return resources;
+  if (!Array.isArray(resources)) {
+    return resources;
+  }
 
   return resources
     .map((resource) => filterFields(role, resource, options))
@@ -200,7 +204,9 @@ export function sanitizeForLogging(obj: any): any {
   const cloned = JSON.parse(JSON.stringify(obj));
 
   function sanitizeRecursive(target: any) {
-    if (typeof target !== 'object' || target === null) return;
+    if (typeof target !== 'object' || target === null) {
+      return;
+    }
 
     for (const key of Object.keys(target)) {
       if (sensitivePatterns.some((pattern) => pattern.test(key))) {

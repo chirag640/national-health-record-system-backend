@@ -48,7 +48,7 @@ export class AnalyticsProcessor extends WorkerHost {
         default:
           throw new Error(`Unknown job type: ${job.name}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Error processing ${job.name} job ${job.id}:`, error);
       throw error;
     }

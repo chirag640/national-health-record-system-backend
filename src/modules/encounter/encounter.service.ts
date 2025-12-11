@@ -79,16 +79,28 @@ export class EncounterService {
 
     const query: any = {};
 
-    if (filters.patientId) query.patientId = filters.patientId;
-    if (filters.doctorId) query.doctorId = new Types.ObjectId(filters.doctorId);
-    if (filters.hospitalId) query.hospitalId = new Types.ObjectId(filters.hospitalId);
-    if (filters.diagnosis) query.diagnosis = { $regex: filters.diagnosis, $options: 'i' };
+    if (filters.patientId) {
+      query.patientId = filters.patientId;
+    }
+    if (filters.doctorId) {
+      query.doctorId = new Types.ObjectId(filters.doctorId);
+    }
+    if (filters.hospitalId) {
+      query.hospitalId = new Types.ObjectId(filters.hospitalId);
+    }
+    if (filters.diagnosis) {
+      query.diagnosis = { $regex: filters.diagnosis, $options: 'i' };
+    }
 
     // Date range filter
     if (filters.startDate || filters.endDate) {
       query.createdAt = {};
-      if (filters.startDate) query.createdAt.$gte = filters.startDate;
-      if (filters.endDate) query.createdAt.$lte = filters.endDate;
+      if (filters.startDate) {
+        query.createdAt.$gte = filters.startDate;
+      }
+      if (filters.endDate) {
+        query.createdAt.$lte = filters.endDate;
+      }
     }
 
     const [items, total] = await Promise.all([

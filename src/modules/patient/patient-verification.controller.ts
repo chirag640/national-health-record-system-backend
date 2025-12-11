@@ -1,5 +1,5 @@
 import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Patient } from '../patient/schemas/patient.schema';
@@ -20,6 +20,22 @@ export class PatientVerificationController {
       'Scans QR code and verifies patient identity. Returns basic info without sensitive data. ' +
       'Used by hospital reception kiosks for patient check-in.',
   })
+  @ApiParam({ name: 'guid', description: 'Patient GUID from QR code (e.g., NHRS-2025-A3B4C5D6)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Patient verified successfully',
+    schema: {
+      properties: {
+        verified: { type: 'boolean', example: true },
+        guid: { type: 'string', example: 'NHRS-2025-A3B4C5D6' },
+        fullName: { type: 'string', example: 'Rajesh Kumar' },
+        dateOfBirth: { type: 'string', format: 'date', example: '1985-03-15' },
+        gender: { type: 'string', example: 'Male' },
+        message: { type: 'string', example: 'Patient identity verified successfully' },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Patient GUID not found - invalid QR code' })
   async verifyPatient(@Param('guid') guid: string) {
     const patient = await this.patientModel
       .findOne({ guid })

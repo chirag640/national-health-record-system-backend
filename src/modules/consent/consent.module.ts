@@ -5,6 +5,8 @@ import { User, UserSchema } from '../../auth/schemas/user.schema';
 import { ConsentController } from './consent.controller';
 import { ConsentService } from './consent.service';
 import { ConsentRepository } from './consent.repository';
+import { EmailModule } from '../../email/email.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { ConsentRepository } from './consent.repository';
       { name: Consent.name, schema: ConsentSchema },
       { name: User.name, schema: UserSchema },
     ]),
+    EmailModule,
+    NotificationModule,
   ],
   controllers: [ConsentController],
   providers: [ConsentService, ConsentRepository],

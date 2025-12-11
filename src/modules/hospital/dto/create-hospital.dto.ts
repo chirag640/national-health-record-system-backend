@@ -12,7 +12,9 @@ export class CreateHospitalDto {
     maxLength: 50,
   })
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     // Sanitize HTML to prevent XSS attacks
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
@@ -30,7 +32,9 @@ export class CreateHospitalDto {
     maxLength: 255,
   })
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     // Sanitize HTML to prevent XSS attacks
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
@@ -48,7 +52,9 @@ export class CreateHospitalDto {
     maxLength: 255,
   })
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     // Sanitize HTML to prevent XSS attacks
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
@@ -66,8 +72,12 @@ export class CreateHospitalDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     return value;
   })
   @IsIn(['Government', 'Private'])
@@ -81,8 +91,12 @@ export class CreateHospitalDto {
   @IsOptional()
   @Transform(({ value }) => {
     // Handle string "null" from frontend forms
-    if (value === 'null' || value === 'undefined' || value === '') return undefined;
-    if (!value) return value;
+    if (value === 'null' || value === 'undefined' || value === '') {
+      return undefined;
+    }
+    if (!value) {
+      return value;
+    }
     return value;
   })
   @IsBoolean()

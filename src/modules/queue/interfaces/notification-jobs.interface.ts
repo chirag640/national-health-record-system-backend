@@ -12,7 +12,9 @@ export interface PushNotificationJob {
   userId: string;
   title: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, string>;
+  deviceTokens?: string[];
+  imageUrl?: string;
   priority: 'high' | 'normal' | 'low';
 }
 

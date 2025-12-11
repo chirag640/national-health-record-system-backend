@@ -35,7 +35,6 @@ export class PrescriptionService {
       })
       .sort({ prescriptionNumber: -1 })
       .select('prescriptionNumber')
-      .lean()
       .exec();
 
     let nextNumber = 1;

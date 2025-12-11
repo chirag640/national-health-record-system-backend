@@ -97,7 +97,7 @@ export class AuditLogInterceptor implements NestInterceptor {
   private async createAuditLog(data: any): Promise<void> {
     try {
       await this.auditLogModel.create(data);
-    } catch (error) {
+    } catch (error: any) {
       // Never let audit logging failure break the request
       const message =
         error instanceof Error
@@ -135,7 +135,9 @@ export class AuditLogInterceptor implements NestInterceptor {
    * Sanitize request body to remove sensitive data
    */
   private sanitizeBody(body: any): any {
-    if (!body) return null;
+    if (!body) {
+      return null;
+    }
 
     const sanitized = { ...body };
     const sensitiveFields = [

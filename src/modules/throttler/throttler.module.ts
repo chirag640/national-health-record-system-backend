@@ -10,13 +10,14 @@ import { ThrottlerGuard } from '@nestjs/throttler';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService): any => {
-        // Using in-memory storage (WARNING: not suitable for multi-instance deployments)
-        // Enable caching feature to use Redis-based rate limiting
+        // Using in-memory storage (works for single-instance deployments)
+        // For multi-instance/cluster deployments, configure Redis storage via CACHE_STORE_REDIS=true
         return {
           throttlers: [
             {
-              ttl: configService.get<number>('THROTTLE_TTL') || 60000, // Time window in milliseconds (default: 1 minute)
-              limit: configService.get<number>('THROTTLE_LIMIT') || 10, // Max requests per window (default: 10)
+              name: 'default',
+              ttl: configService.get<number>('THROTTLE_TTL') || 60000, // 60 seconds (1 minute)
+              limit: configService.get<number>('THROTTLE_LIMIT') || 100, // 100 requests per minute (production-ready default)
             },
           ],
         };

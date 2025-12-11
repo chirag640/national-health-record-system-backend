@@ -37,7 +37,7 @@ export abstract class BaseRepository<T extends Document> {
 
       this.logger.log('Transaction completed successfully');
       return result!;
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logger.error(`Transaction failed: ${err.message}`, err.stack);
       throw error;
@@ -86,5 +86,65 @@ export abstract class BaseRepository<T extends Document> {
    */
   async bulkCreateWithTransaction(dataArray: Partial<T>[], session?: ClientSession): Promise<T[]> {
     return this.model.create(dataArray, { session });
+  }
+
+  /**
+   * Create a document
+   */
+  async create(data: Partial<T>): Promise<T> {
+    const created = await this.model.create(data);
+    return created as T;
+  }
+
+  /**
+   * Find document by ID
+   */
+  async findById(id: string): Promise<T | null> {
+    return this.model.findById(id).exec();
+  }
+
+  /**
+   * Find one document by query
+   */
+  async findOne(query: any): Promise<T | null> {
+    return this.model.findOne(query).exec();
+  }
+
+  /**
+   * Find all documents
+   */
+  async findAll(query: any = {}): Promise<T[]> {
+    return this.model.find(query).exec();
+  }
+
+  /**
+   * Update document by ID
+   */
+  async update(id: string, data: Partial<T>): Promise<T | null> {
+    return this.model.findByIdAndUpdate(id, { $set: data }, { new: true }).exec();
+  }
+
+  /**
+   * Delete document by ID
+   */
+  async delete(id: string): Promise<boolean> {
+    const result = await this.model.findByIdAndDelete(id).exec();
+    return !!result;
+  }
+
+  /**
+   * Soft delete document by ID
+   */
+  async softDelete(id: string): Promise<T | null> {
+    return this.model
+      .findByIdAndUpdate(id, { $set: { deletedAt: new Date() } }, { new: true })
+      .exec();
+  }
+
+  /**
+   * Count documents
+   */
+  async count(query: any = {}): Promise<number> {
+    return this.model.countDocuments(query).exec();
   }
 }

@@ -80,7 +80,7 @@ export class FieldAccessService {
       .exec();
 
     // Merge rules (database overrides defaults)
-    let mergedPolicy = { ...defaultPolicy };
+    const mergedPolicy = { ...defaultPolicy };
 
     for (const rule of dbRules) {
       if (rule.allow && rule.allow.length > 0) {
@@ -207,7 +207,7 @@ export class FieldAccessService {
     try {
       const log = new this.logModel(dto);
       await log.save();
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logger.error(`Failed to log access: ${err.message}`);
     }

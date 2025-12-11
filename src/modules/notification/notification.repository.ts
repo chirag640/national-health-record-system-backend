@@ -92,7 +92,7 @@ export class NotificationRepository extends BaseRepository<NotificationDocument>
 
     // Execute query
     const [data, total] = await Promise.all([
-      this.notificationModel.find(query).sort(sort).skip(skip).limit(limit).lean().exec(),
+      this.notificationModel.find(query).sort(sort).skip(skip).limit(limit).exec(),
       this.notificationModel.countDocuments(query).exec(),
     ]);
 

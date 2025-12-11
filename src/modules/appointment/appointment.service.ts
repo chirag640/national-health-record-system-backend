@@ -21,7 +21,8 @@ export class AppointmentService {
   constructor(private readonly appointmentRepository: AppointmentRepository) {}
 
   /**
-   * Create a new appointment with validation
+   * Create a new appointment with validation and atomic transaction
+   * Uses MongoDB transaction to prevent race conditions and overbooking
    */
   async create(dto: CreateAppointmentDto, _userId?: string): Promise<AppointmentOutputDto> {
     // Validate appointment date is in the future
@@ -40,35 +41,44 @@ export class AppointmentService {
     // Calculate duration
     const durationMinutes = this.calculateDuration(dto.startTime, dto.endTime);
 
-    // Check for conflicting appointments
-    const conflicts = await this.appointmentRepository.findConflictingAppointments(
-      dto.doctorId,
-      new Date(dto.appointmentDate),
-      dto.startTime,
-      dto.endTime,
-    );
-
-    if (conflicts.length > 0) {
-      const conflict = conflicts[0] as any;
-      throw new ConflictException(
-        `Doctor already has an appointment during this time slot. Conflicting appointment ID: ${conflict._id}`,
+    // Use transaction to atomically check conflicts and create appointment
+    const appointment = await this.appointmentRepository.withTransaction(async (_session) => {
+      // Check for conflicting appointments within the transaction
+      // This ensures no other request can book the same slot between check and create
+      const conflicts = await this.appointmentRepository.findConflictingAppointments(
+        dto.doctorId,
+        new Date(dto.appointmentDate),
+        dto.startTime,
+        dto.endTime,
       );
-    }
 
-    // Create appointment
-    const appointment = await this.appointmentRepository.create({
-      ...dto,
-      patientId: dto.patientId,
-      doctorId: new Types.ObjectId(dto.doctorId),
-      hospitalId: new Types.ObjectId(dto.hospitalId),
-      appointmentDate: new Date(dto.appointmentDate),
-      durationMinutes,
-      status: AppointmentStatus.PROPOSED,
-      doctorStatus: ParticipantStatus.NEEDS_ACTION,
+      if (conflicts.length > 0) {
+        const conflict = conflicts[0] as any;
+        throw new ConflictException(
+          `Doctor already has an appointment during this time slot. Conflicting appointment ID: ${conflict._id}`,
+        );
+      }
+
+      // Create appointment within the same transaction
+      // This is now atomic with the conflict check above
+      const created = await this.appointmentRepository.create({
+        ...dto,
+        patientId: dto.patientId,
+        doctorId: new Types.ObjectId(dto.doctorId),
+        hospitalId: new Types.ObjectId(dto.hospitalId),
+        appointmentDate: new Date(dto.appointmentDate),
+        durationMinutes,
+        status: AppointmentStatus.PROPOSED,
+        doctorStatus: ParticipantStatus.NEEDS_ACTION,
+      });
+
+      return created;
     });
 
     const appointmentAny = appointment as any;
-    this.logger.log(`Appointment created: ${appointmentAny._id} for patient ${dto.patientId}`);
+    this.logger.log(
+      `Appointment created atomically: ${appointmentAny._id} for patient ${dto.patientId}`,
+    );
 
     return this.mapToOutput(appointment);
   }

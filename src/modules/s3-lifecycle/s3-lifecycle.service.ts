@@ -245,7 +245,7 @@ export class S3LifecycleService {
           }
 
           processingQueued = true;
-        } catch (error) {
+        } catch (error: any) {
           this.logger.error('Failed to queue background processing:', error);
           // Don't fail the upload if queue fails
         }
@@ -259,7 +259,7 @@ export class S3LifecycleService {
         metadata,
         processingQueued,
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to complete upload for ${storagePath}:`, error);
       throw new BadRequestException('File not found or upload incomplete');
     }
@@ -280,7 +280,7 @@ export class S3LifecycleService {
         Key: storagePath,
       });
       await this.s3Client.send(headCommand);
-    } catch (error) {
+    } catch (error: any) {
       throw new NotFoundException('File not found');
     }
 

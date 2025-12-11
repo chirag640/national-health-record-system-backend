@@ -35,7 +35,9 @@ export class UpdateAppointmentDto extends PartialType(CreateAppointmentDto) {
   })
   @IsOptional()
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     const trimmed = value.trim();
     return sanitizeHtml(trimmed, { allowedTags: [], allowedAttributes: {} });
   })

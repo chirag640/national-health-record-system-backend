@@ -219,7 +219,7 @@ export const SubstitutionAllowanceSchema = SchemaFactory.createForClass(Substitu
   toObject: { virtuals: true },
 })
 export class Prescription {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   prescriptionNumber!: string; // Unique prescription identifier (e.g., RX-2024-001234)
 
   @Prop({
@@ -415,12 +415,16 @@ PrescriptionSchema.index({ medicationName: 'text', genericName: 'text' }); // Te
 
 // Virtual for checking if prescription is expired
 PrescriptionSchema.virtual('isExpired').get(function () {
-  if (!this.dispenseRequest?.validityPeriodEnd) return false;
+  if (!this.dispenseRequest?.validityPeriodEnd) {
+    return false;
+  }
   return new Date() > this.dispenseRequest.validityPeriodEnd;
 });
 
 // Virtual for checking if refills available
 PrescriptionSchema.virtual('refillsRemaining').get(function () {
-  if (!this.dispenseRequest) return 0;
+  if (!this.dispenseRequest) {
+    return 0;
+  }
   return Math.max(0, (this.dispenseRequest.numberOfRepeatsAllowed || 0) - this.dispensedCount);
 });

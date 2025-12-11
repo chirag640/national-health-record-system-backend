@@ -24,18 +24,22 @@ async function bootstrap() {
   logger.log('🔄 Processing jobs from all queues...');
 
   // Handle process signals
-  process.on('SIGTERM', async () => {
-    logger.log('⚠️  SIGTERM received, shutting down gracefully...');
-    await app.close();
-    logger.log('✅ Worker shut down complete');
-    process.exit(0);
+  process.on('SIGTERM', () => {
+    void (async () => {
+      logger.log('⚠️  SIGTERM received, shutting down gracefully...');
+      await app.close();
+      logger.log('✅ Worker shut down complete');
+      process.exit(0);
+    })();
   });
 
-  process.on('SIGINT', async () => {
-    logger.log('⚠️  SIGINT received, shutting down gracefully...');
-    await app.close();
-    logger.log('✅ Worker shut down complete');
-    process.exit(0);
+  process.on('SIGINT', () => {
+    void (async () => {
+      logger.log('⚠️  SIGINT received, shutting down gracefully...');
+      await app.close();
+      logger.log('✅ Worker shut down complete');
+      process.exit(0);
+    })();
   });
 }
 

@@ -14,35 +14,34 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
     super(appointmentModel, connection);
   }
 
-  async create(data: Partial<Appointment>): Promise<Appointment> {
+  async create(data: Partial<AppointmentDocument>): Promise<AppointmentDocument> {
     const created = new this.appointmentModel(data);
-    const saved = await created.save();
-    return saved.toObject() as Appointment;
+    return await created.save();
   }
 
-  async findAll(skip: number = 0, limit: number = 10): Promise<Appointment[]> {
+  async findAll(skip: number = 0, limit: number = 10): Promise<AppointmentDocument[]> {
     return this.appointmentModel
       .find()
       .skip(skip)
       .limit(limit)
       .sort({ appointmentDate: -1, startTime: -1 })
-      .lean()
-      .exec() as Promise<Appointment[]>;
+      .exec();
   }
 
-  async findById(id: string): Promise<Appointment | null> {
-    return this.appointmentModel.findById(id).lean().exec() as Promise<Appointment | null>;
+  async findById(id: string): Promise<AppointmentDocument | null> {
+    return this.appointmentModel.findById(id).exec();
   }
 
-  async update(id: string, data: Partial<Appointment>): Promise<Appointment | null> {
-    return this.appointmentModel
-      .findByIdAndUpdate(id, { $set: data }, { new: true })
-      .lean()
-      .exec() as Promise<Appointment | null>;
+  async update(
+    id: string,
+    data: Partial<AppointmentDocument>,
+  ): Promise<AppointmentDocument | null> {
+    return this.appointmentModel.findByIdAndUpdate(id, { $set: data }, { new: true }).exec();
   }
 
-  async delete(id: string): Promise<Appointment | null> {
-    return this.appointmentModel.findByIdAndDelete(id).lean().exec() as Promise<Appointment | null>;
+  async delete(id: string): Promise<boolean> {
+    const result = await this.appointmentModel.findByIdAndDelete(id).exec();
+    return !!result;
   }
 
   async count(): Promise<number> {
@@ -62,8 +61,7 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
       .skip(skip)
       .limit(limit)
       .sort({ appointmentDate: -1, startTime: -1 })
-      .lean()
-      .exec() as Promise<Appointment[]>;
+      .exec();
   }
 
   /**
@@ -79,8 +77,7 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
       .skip(skip)
       .limit(limit)
       .sort({ appointmentDate: 1, startTime: 1 })
-      .lean()
-      .exec() as Promise<Appointment[]>;
+      .exec();
   }
 
   /**
@@ -96,8 +93,7 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
       .skip(skip)
       .limit(limit)
       .sort({ appointmentDate: -1, startTime: -1 })
-      .lean()
-      .exec() as Promise<Appointment[]>;
+      .exec();
   }
 
   /**
@@ -119,8 +115,7 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
       .skip(skip)
       .limit(limit)
       .sort({ appointmentDate: 1, startTime: 1 })
-      .lean()
-      .exec() as Promise<Appointment[]>;
+      .exec();
   }
 
   /**
@@ -160,7 +155,7 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
       query._id = { $ne: excludeAppointmentId };
     }
 
-    return this.appointmentModel.find(query).lean().exec() as Promise<Appointment[]>;
+    return this.appointmentModel.find(query).exec();
   }
 
   /**
@@ -189,7 +184,6 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
         status: { $nin: ['cancelled', 'noshow', 'fulfilled'] },
       })
       .sort({ appointmentDate: 1, startTime: 1 })
-      .lean()
-      .exec() as Promise<Appointment[]>;
+      .exec();
   }
 }

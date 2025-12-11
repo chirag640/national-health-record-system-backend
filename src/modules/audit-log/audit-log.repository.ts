@@ -14,35 +14,26 @@ export class AuditLogRepository extends BaseRepository<AuditLogDocument> {
     super(auditLogModel, connection);
   }
 
-  async create(data: Partial<AuditLog>): Promise<AuditLog> {
+  async create(data: Partial<AuditLogDocument>): Promise<AuditLogDocument> {
     const created = new this.auditLogModel(data);
-    const saved = await created.save();
-    return saved.toObject() as AuditLog;
+    return await created.save();
   }
 
-  async findAll(skip: number = 0, limit: number = 10): Promise<AuditLog[]> {
-    return this.auditLogModel
-      .find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 }) // Most recent first
-      .lean()
-      .exec() as Promise<AuditLog[]>;
+  async findAll(skip: number = 0, limit: number = 10): Promise<AuditLogDocument[]> {
+    return this.auditLogModel.find().skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
   }
 
-  async findById(id: string): Promise<AuditLog | null> {
-    return this.auditLogModel.findById(id).lean().exec() as Promise<AuditLog | null>;
+  async findById(id: string): Promise<AuditLogDocument | null> {
+    return this.auditLogModel.findById(id).exec();
   }
 
-  async update(id: string, data: Partial<AuditLog>): Promise<AuditLog | null> {
-    return this.auditLogModel
-      .findByIdAndUpdate(id, data, { new: true })
-      .lean()
-      .exec() as Promise<AuditLog | null>;
+  async update(id: string, data: Partial<AuditLogDocument>): Promise<AuditLogDocument | null> {
+    return this.auditLogModel.findByIdAndUpdate(id, data, { new: true }).exec();
   }
 
-  async delete(id: string): Promise<AuditLog | null> {
-    return this.auditLogModel.findByIdAndDelete(id).lean().exec() as Promise<AuditLog | null>;
+  async delete(id: string): Promise<boolean> {
+    const result = await this.auditLogModel.findByIdAndDelete(id).exec();
+    return !!result;
   }
 
   async count(): Promise<number> {

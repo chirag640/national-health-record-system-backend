@@ -33,17 +33,21 @@ async function bootstrap() {
   logger.log('🔄 Processing jobs from: notifications, documents, sync, analytics, cleanup');
 
   // Graceful shutdown
-  process.on('SIGTERM', async () => {
-    logger.log('⚠️  SIGTERM received');
-    await app.close();
-    process.exit(0);
+  process.on('SIGTERM', () => {
+    void (async () => {
+      logger.log('⚠️  SIGTERM received');
+      await app.close();
+      process.exit(0);
+    })();
   });
 
-  process.on('SIGINT', async () => {
-    logger.log('⚠️  SIGINT received');
-    await app.close();
-    process.exit(0);
+  process.on('SIGINT', () => {
+    void (async () => {
+      logger.log('\u26a0\ufe0f  SIGINT received');
+      await app.close();
+      process.exit(0);
+    })();
   });
 }
 
-bootstrap();
+void bootstrap();

@@ -48,7 +48,7 @@ export class SyncProcessor extends WorkerHost {
         default:
           throw new Error(`Unknown job type: ${job.name}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Error processing ${job.name} job ${job.id}:`, error);
       throw error;
     }
@@ -69,7 +69,9 @@ export class SyncProcessor extends WorkerHost {
       const operation = data.operations[i];
 
       try {
-        if (!operation) continue;
+        if (!operation) {
+          continue;
+        }
         // Process each operation
         await this.processSyncOperation(operation, data.userId, data.deviceId);
 
@@ -79,8 +81,10 @@ export class SyncProcessor extends WorkerHost {
           entity: operation.entity,
           action: operation.action,
         });
-      } catch (error) {
-        if (!operation) continue;
+      } catch (error: any) {
+        if (!operation) {
+          continue;
+        }
         this.logger.error(`Failed to process operation ${operation.id}:`, error);
 
         // Check if this is a conflict
@@ -303,7 +307,7 @@ export class SyncProcessor extends WorkerHost {
           operationId: operation.id,
           valid: true,
         });
-      } catch (error) {
+      } catch (error: any) {
         const err = error as Error;
         validationResults.push({
           operationId: operation.id,

@@ -24,9 +24,8 @@ export class SyncProducer {
    * Process sync batch from offline client
    */
   async processSyncBatch(data: SyncBatchJob) {
-    const priority = data.priority === 'high'
-      ? this.queueConfig.PRIORITY.HIGH
-      : this.queueConfig.PRIORITY.NORMAL;
+    const priority =
+      data.priority === 'high' ? this.queueConfig.PRIORITY.HIGH : this.queueConfig.PRIORITY.NORMAL;
 
     const job = await this.syncQueue.add(
       'sync-batch',
@@ -45,10 +44,7 @@ export class SyncProducer {
     const job = await this.syncQueue.add(
       'conflict-resolution',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.HIGH,
-        'critical',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.HIGH, 'critical'),
     );
 
     this.logger.log(`Queued conflict resolution job ${job.id} for ${data.entity} ${data.entityId}`);
@@ -62,10 +58,7 @@ export class SyncProducer {
     const job = await this.syncQueue.add(
       'sync-retry',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.HIGH,
-        'standard',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.HIGH, 'standard'),
     );
 
     this.logger.log(`Queued sync retry job ${job.id} (attempt ${data.retryAttempt})`);
@@ -79,10 +72,7 @@ export class SyncProducer {
     const job = await this.syncQueue.add(
       'offline-sync',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.NORMAL,
-        'standard',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.NORMAL, 'standard'),
     );
 
     this.logger.log(`Queued offline sync job ${job.id} for user ${data.userId}`);
@@ -96,10 +86,7 @@ export class SyncProducer {
     const job = await this.syncQueue.add(
       'data-validation',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.NORMAL,
-        'standard',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.NORMAL, 'standard'),
     );
 
     this.logger.log(`Queued data validation job ${job.id} for batch ${data.batchId}`);
@@ -111,7 +98,7 @@ export class SyncProducer {
    */
   async getJobStatus(jobId: string) {
     const job = await this.syncQueue.getJob(jobId);
-    
+
     if (!job) {
       return null;
     }
@@ -132,9 +119,10 @@ export class SyncProducer {
    */
   async getPendingOperations(userId: string) {
     const jobs = await this.syncQueue.getJobs(['waiting', 'active', 'delayed']);
-    
-    return jobs.filter(job => 
-      job.data.userId === userId || job.data.operations?.some((op: any) => op.userId === userId)
+
+    return jobs.filter(
+      (job) =>
+        job.data.userId === userId || job.data.operations?.some((op: any) => op.userId === userId),
     );
   }
 }

@@ -58,7 +58,7 @@ export class DocumentProcessor extends WorkerHost {
         default:
           throw new Error(`Unknown job type: ${job.name}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Error processing ${job.name} job ${job.id}:`, error);
       throw error;
     }
@@ -104,7 +104,7 @@ export class DocumentProcessor extends WorkerHost {
         size: stats.size,
         processedAt: new Date(),
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to process upload for ${data.fileId}:`, error);
       throw error;
     }
@@ -134,7 +134,7 @@ export class DocumentProcessor extends WorkerHost {
         checksum,
         algorithm: data.algorithm,
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to generate checksum for ${data.fileId}:`, error);
       throw error;
     }
@@ -200,7 +200,7 @@ export class DocumentProcessor extends WorkerHost {
         bucket: data.bucket,
         uploadedAt: new Date(),
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to upload ${data.fileId} to S3:`, error);
       throw error;
     }
@@ -231,7 +231,7 @@ export class DocumentProcessor extends WorkerHost {
         reason: data.reason,
         deletedAt: new Date(),
       };
-    } catch (error) {
+    } catch (error: any) {
       if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
         // File already deleted
         this.logger.warn(`File ${data.filepath} already deleted`);

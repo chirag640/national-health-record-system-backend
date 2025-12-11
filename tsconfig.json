@@ -19,7 +19,7 @@
     "strictNullChecks": true, // Disallow null/undefined in type checking
     "noImplicitAny": true, // Error on expressions with implied 'any' type
     "strictBindCallApply": true, // Check 'bind', 'call', and 'apply' methods
-    "strictPropertyInitialization": true, // Ensure class properties are initialized
+    "strictPropertyInitialization": false, // Disabled for Mongoose schemas and DTOs
     "forceConsistentCasingInFileNames": true, // Prevent case-sensitive import issues
     "noFallthroughCasesInSwitch": true, // Prevent fallthrough cases in switch
     "noUnusedLocals": true, // Error on unused local variables

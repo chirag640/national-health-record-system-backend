@@ -14,35 +14,26 @@ export class EncounterRepository extends BaseRepository<EncounterDocument> {
     super(encounterModel, connection);
   }
 
-  async create(data: Partial<Encounter>): Promise<Encounter> {
+  async create(data: Partial<EncounterDocument>): Promise<EncounterDocument> {
     const created = new this.encounterModel(data);
-    const saved = await created.save();
-    return saved.toObject() as Encounter;
+    return await created.save();
   }
 
-  async findAll(skip: number = 0, limit: number = 10): Promise<Encounter[]> {
-    return this.encounterModel
-      .find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 }) // Most recent first
-      .lean()
-      .exec() as Promise<Encounter[]>;
+  async findAll(skip: number = 0, limit: number = 10): Promise<EncounterDocument[]> {
+    return this.encounterModel.find().skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
   }
 
-  async findById(id: string): Promise<Encounter | null> {
-    return this.encounterModel.findById(id).lean().exec() as Promise<Encounter | null>;
+  async findById(id: string): Promise<EncounterDocument | null> {
+    return this.encounterModel.findById(id).exec();
   }
 
-  async update(id: string, data: Partial<Encounter>): Promise<Encounter | null> {
-    return this.encounterModel
-      .findByIdAndUpdate(id, data, { new: true })
-      .lean()
-      .exec() as Promise<Encounter | null>;
+  async update(id: string, data: Partial<EncounterDocument>): Promise<EncounterDocument | null> {
+    return this.encounterModel.findByIdAndUpdate(id, data, { new: true }).exec();
   }
 
-  async delete(id: string): Promise<Encounter | null> {
-    return this.encounterModel.findByIdAndDelete(id).lean().exec() as Promise<Encounter | null>;
+  async delete(id: string): Promise<boolean> {
+    const result = await this.encounterModel.findByIdAndDelete(id).exec();
+    return !!result;
   }
 
   async count(): Promise<number> {
@@ -52,14 +43,8 @@ export class EncounterRepository extends BaseRepository<EncounterDocument> {
   /**
    * Advanced search with custom query
    */
-  async search(query: any, skip: number = 0, limit: number = 10): Promise<Encounter[]> {
-    return this.encounterModel
-      .find(query)
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .lean()
-      .exec() as Promise<Encounter[]>;
+  async search(query: any, skip: number = 0, limit: number = 10): Promise<EncounterDocument[]> {
+    return this.encounterModel.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
   }
 
   /**

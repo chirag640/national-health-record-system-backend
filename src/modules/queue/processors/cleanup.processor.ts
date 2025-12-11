@@ -61,7 +61,7 @@ export class CleanupProcessor extends WorkerHost {
         default:
           throw new Error(`Unknown job type: ${job.name}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Error processing ${job.name} job ${job.id}:`, error);
       throw error;
     }
@@ -83,7 +83,9 @@ export class CleanupProcessor extends WorkerHost {
 
       for (let i = 0; i < files.length; i++) {
         const fileName = files[i];
-        if (!fileName) continue;
+        if (!fileName) {
+          continue;
+        }
         const filePath = join(data.directory, fileName);
 
         try {
@@ -107,7 +109,7 @@ export class CleanupProcessor extends WorkerHost {
               );
             }
           }
-        } catch (error) {
+        } catch (error: any) {
           const err = error as Error;
           this.logger.warn(`Failed to process file ${filePath}:`, err.message);
         }
@@ -122,7 +124,7 @@ export class CleanupProcessor extends WorkerHost {
         dryRun: data.dryRun || false,
         cleanedAt: new Date(),
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to clean temp files in ${data.directory}:`, error);
       throw error;
     }
@@ -300,7 +302,7 @@ export class CleanupProcessor extends WorkerHost {
         filesDeleted: deletedCount,
         cleanedAt: new Date(),
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to cleanup S3 temp files:', error);
       throw error;
     }

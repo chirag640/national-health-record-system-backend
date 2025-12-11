@@ -53,10 +53,14 @@ export class CreateConsentDto {
     required: true,
   })
   @Transform(({ value }) => {
-    if (!value) return value;
+    if (!value) {
+      return value;
+    }
     // Handle various date formats
     const date = new Date(value);
-    if (isNaN(date.getTime())) return value; // Let validator handle invalid dates
+    if (isNaN(date.getTime())) {
+      return value;
+    } // Let validator handle invalid dates
     return date.toISOString(); // Normalize to ISO 8601
   })
   @IsISO8601({ strict: false })

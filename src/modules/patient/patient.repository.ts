@@ -14,56 +14,41 @@ export class PatientRepository extends BaseRepository<PatientDocument> {
     super(patientModel, connection);
   }
 
-  async create(data: Partial<Patient>): Promise<Patient> {
+  async create(data: Partial<PatientDocument>): Promise<PatientDocument> {
     const created = new this.patientModel(data);
-    const saved = await created.save();
-    return saved.toObject() as Patient;
+    return await created.save();
   }
 
-  async findAll(skip: number = 0, limit: number = 10): Promise<Patient[]> {
-    return this.patientModel
-      .find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 }) // Most recent first
-      .lean()
-      .exec() as Promise<Patient[]>;
+  async findAll(skip: number = 0, limit: number = 10): Promise<PatientDocument[]> {
+    return this.patientModel.find().skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
   }
 
-  async findById(id: string): Promise<Patient | null> {
-    return this.patientModel.findById(id).lean().exec() as Promise<Patient | null>;
+  async findById(id: string): Promise<PatientDocument | null> {
+    return this.patientModel.findById(id).exec();
   }
 
-  async update(id: string, data: Partial<Patient>): Promise<Patient | null> {
-    return this.patientModel
-      .findByIdAndUpdate(id, data, { new: true })
-      .lean()
-      .exec() as Promise<Patient | null>;
+  async update(id: string, data: Partial<PatientDocument>): Promise<PatientDocument | null> {
+    return this.patientModel.findByIdAndUpdate(id, data, { new: true }).exec();
   }
 
-  async delete(id: string): Promise<Patient | null> {
-    return this.patientModel.findByIdAndDelete(id).lean().exec() as Promise<Patient | null>;
+  async delete(id: string): Promise<boolean> {
+    const result = await this.patientModel.findByIdAndDelete(id).exec();
+    return !!result;
   }
 
   async count(): Promise<number> {
     return this.patientModel.countDocuments().exec();
   }
 
-  async findByGuid(guid: string): Promise<Patient | null> {
-    return this.patientModel.findOne({ guid }).lean().exec() as Promise<Patient | null>;
+  async findByGuid(guid: string): Promise<PatientDocument | null> {
+    return this.patientModel.findOne({ guid }).exec();
   }
 
   /**
    * Advanced search with custom query
    */
-  async search(query: any, skip: number = 0, limit: number = 10): Promise<Patient[]> {
-    return this.patientModel
-      .find(query)
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .lean()
-      .exec() as Promise<Patient[]>;
+  async search(query: any, skip: number = 0, limit: number = 10): Promise<PatientDocument[]> {
+    return this.patientModel.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
   }
 
   /**

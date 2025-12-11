@@ -237,8 +237,12 @@ export function canAccessField(role: string, fieldPath: string): boolean {
  * Supports wildcards: "orders.*.paymentInfo"
  */
 function matchesFieldPath(fieldPath: string, pattern: string): boolean {
-  if (pattern === '*') return true;
-  if (pattern === fieldPath) return true;
+  if (pattern === '*') {
+    return true;
+  }
+  if (pattern === fieldPath) {
+    return true;
+  }
 
   // Convert pattern to regex
   const regexPattern = pattern.replace(/\./g, '\\.').replace(/\*/g, '.*');

@@ -1,0 +1,1887 @@
+{
+  "info": {
+    "name": "National Health Record System API",
+    "description": "Patient-centric EHR platform for patients, doctors, and government hospitals with consent control, secure document storage, offline sync, and audit logging.\n\n## 🚀 Quick Start\n\n### 1. Setup Database (First Time Only)\n```bash\nnpm run seed\n```\n\n### 2. Login to Get Authorization Token\nUse the **\"Login (Default Admin) ⭐\"** request in the Auth folder with these credentials:\n- **Email:** admin@national-health-record-system.com\n- **Password:** Admin@123456\n- **Role:** Patient\n\n### 3. Token is Auto-Saved!\nThe access token is automatically saved to the `{{accessToken}}` variable and used for all authenticated requests.\n\n## 📋 API Endpoint Structure\n- **Auth endpoints:** `/api/auth/*` (no version)\n- **All other endpoints:** `/api/v1/*` (versioned)\n\n## 🔐 Valid Role Values\n- `Patient` - for patient users\n- `Doctor` - for doctor users\n- `HospitalAdmin` - for hospital administrators\n- `SuperAdmin` - for super administrators",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string",
+      "description": "Base API URL (auth endpoints have no version)"
+    },
+    {
+      "key": "baseUrlV1",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string",
+      "description": "Base API URL for versioned endpoints"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patientId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "hospitalId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "doctorId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "prescriptionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "encounterId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "url": "http://localhost:3000/health",
+        "description": "Check API health status"
+      }
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.accessToken) {",
+                  "        pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "        pm.collectionVariables.set('refreshToken', response.refreshToken);",
+                  "        console.log('✅ Patient registered and tokens saved');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patient@example.com\",\n  \"password\": \"SecureP@ssw0rd123\",\n  \"fullName\": \"John Doe\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register/patient"
+          }
+        },
+        {
+          "name": "Register Doctor (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"doctor@hospital.com\",\n  \"password\": \"VerySecureP@ssw0rd123!\",\n  \"fullName\": \"Dr. Jane Smith\",\n  \"specialization\": \"Cardiology\",\n  \"licenseNumber\": \"MH-123456\",\n  \"phone\": \"9876543210\",\n  \"hospitalId\": \"{{hospitalId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register/doctor"
+          }
+        },
+        {
+          "name": "Register Hospital Admin (Super Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@hospital.com\",\n  \"password\": \"VerySecureP@ssw0rd123!\",\n  \"fullName\": \"Hospital Admin\",\n  \"hospitalId\": \"{{hospitalId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register/hospital-admin"
+          }
+        },
+        {
+          "name": "Login (Default Admin) ⭐",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
+                  "    console.log('🔐 Default Admin Login successful - Tokens saved');",
+                  "    console.log('✅ Access Token:', response.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@national-health-record-system.com\",\n  \"password\": \"Admin@123456\",\n  \"role\": \"Patient\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "🔐 DEFAULT ADMIN LOGIN - Use this to get authorization token!\n\nCredentials from seed script:\n- Email: admin@national-health-record-system.com\n- Password: Admin@123456\n- Role: Patient (seeded as Patient role)\n\n⚠️ Run 'npm run seed' first if database is empty!"
+          }
+        },
+        {
+          "name": "Login (Patient)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
+                  "    console.log('🔐 Patient Login successful - Tokens saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patient@example.com\",\n  \"password\": \"SecureP@ssw0rd123\",\n  \"role\": \"Patient\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Login as Patient. Role must be: Patient, Doctor, HospitalAdmin, or SuperAdmin"
+          }
+        },
+        {
+          "name": "Login (Doctor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
+                  "    console.log('🔐 Doctor login successful - Tokens saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"doctor@hospital.com\",\n  \"password\": \"VerySecureP@ssw0rd123!\",\n  \"role\": \"Doctor\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Login as Doctor"
+          }
+        },
+        {
+          "name": "Login (Hospital Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
+                  "    console.log('🔐 Hospital Admin login successful - Tokens saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@hospital.com\",\n  \"password\": \"VerySecureP@ssw0rd123!\",\n  \"role\": \"HospitalAdmin\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Login as Hospital Admin"
+          }
+        },
+        {
+          "name": "Login (Super Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
+                  "    console.log('🔐 Super Admin login successful - Tokens saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"superadmin@health.gov.in\",\n  \"password\": \"ExtremelySecureP@ssw0rd123!#\",\n  \"role\": \"SuperAdmin\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login",
+            "description": "Login as Super Admin"
+          }
+        },
+        {
+          "name": "Request OTP Login",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patient@example.com\",\n  \"role\": \"Patient\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login/request-otp"
+          }
+        },
+        {
+          "name": "Verify OTP Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.refreshToken);",
+                  "    console.log('🔐 OTP verified - Tokens saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patient@example.com\",\n  \"otp\": \"123456\",\n  \"purpose\": \"Patient\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login/verify-otp"
+          }
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"verification-token-string\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/verify-email"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "    console.log('🔄 Access token refreshed');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/forgot-password"
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"reset-token-string\",\n  \"newPassword\": \"NewSecureP@ssw0rd123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/reset-password"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/logout"
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Patients",
+      "item": [
+        {
+          "name": "Create Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response._id) {",
+                  "        pm.collectionVariables.set('patientId', response._id);",
+                  "        console.log('✅ Patient created:', response._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"guid\": \"ABCD-1234-EFGH-5678\",\n  \"fullName\": \"Rajesh Kumar\",\n  \"phone\": \"9876543210\",\n  \"gender\": \"Male\",\n  \"dateOfBirth\": \"1990-05-15T00:00:00.000Z\",\n  \"address\": {\n    \"street\": \"123 Main Street\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"pincode\": \"400001\"\n  },\n  \"allergies\": [\"Penicillin\", \"Peanuts\"],\n  \"chronicDiseases\": [\"Diabetes Type 2\", \"Hypertension\"],\n  \"bloodGroup\": \"O+\",\n  \"emergencyContact\": {\n    \"name\": \"Priya Kumar\",\n    \"relationship\": \"Spouse\",\n    \"phone\": \"9876543211\"\n  },\n  \"hasSmartphone\": true,\n  \"idCardIssued\": false\n}"
+            },
+            "url": "{{baseUrlV1}}/patients"
+          }
+        },
+        {
+          "name": "Get All Patients",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/patients?page=1&limit=10",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["patients"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Patients",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/patients/search/Rajesh"
+          }
+        },
+        {
+          "name": "Get Patient by GUID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/patients/guid/ABCD-1234-EFGH-5678"
+          }
+        },
+        {
+          "name": "Get Patient by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/patients/{{patientId}}"
+          }
+        },
+        {
+          "name": "Get Patient ID Card",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/patients/{{patientId}}/id-card",
+            "description": "Returns patient ID card with QR code"
+          }
+        },
+        {
+          "name": "Update Patient",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Rajesh Kumar Updated\",\n  \"phone\": \"9876543299\",\n  \"address\": {\n    \"street\": \"456 New Street\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"pincode\": \"400002\"\n  }\n}"
+            },
+            "url": "{{baseUrlV1}}/patients/{{patientId}}"
+          }
+        },
+        {
+          "name": "Delete Patient",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrlV1}}/patients/{{patientId}}"
+          }
+        },
+        {
+          "name": "Verify Patient GUID (Public)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": "{{baseUrlV1}}/patients/verify/ABCD-1234-EFGH-5678",
+            "description": "Public endpoint for QR code verification at hospital kiosks"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hospitals",
+      "item": [
+        {
+          "name": "Create Hospital",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response._id) {",
+                  "        pm.collectionVariables.set('hospitalId', response._id);",
+                  "        console.log('✅ Hospital created:', response._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Gandhi Memorial Hospital\",\n  \"state\": \"Maharashtra\",\n  \"district\": \"Mumbai\",\n  \"hospitalType\": \"Government\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrlV1}}/hospitals"
+          }
+        },
+        {
+          "name": "Get All Hospitals",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/hospitals?page=1&limit=10",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["hospitals"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Hospital by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/hospitals/{{hospitalId}}"
+          }
+        },
+        {
+          "name": "Update Hospital",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Gandhi Memorial Hospital - Updated\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrlV1}}/hospitals/{{hospitalId}}"
+          }
+        },
+        {
+          "name": "Delete Hospital",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrlV1}}/hospitals/{{hospitalId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Doctors",
+      "item": [
+        {
+          "name": "Create Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response._id) {",
+                  "        pm.collectionVariables.set('doctorId', response._id);",
+                  "        console.log('✅ Doctor created:', response._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hospitalId\": \"{{hospitalId}}\",\n  \"fullName\": \"Dr. Anjali Sharma\",\n  \"phone\": \"9876543210\",\n  \"specialization\": \"Cardiology\",\n  \"licenseNumber\": \"MH-123456\"\n}"
+            },
+            "url": "{{baseUrlV1}}/doctors"
+          }
+        },
+        {
+          "name": "Get All Doctors",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/doctors?page=1&limit=10",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["doctors"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Doctor by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/doctors/{{doctorId}}"
+          }
+        },
+        {
+          "name": "Update Doctor",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Dr. Anjali Sharma (Updated)\",\n  \"specialization\": \"Cardiology & Interventional\",\n  \"phone\": \"9876543299\"\n}"
+            },
+            "url": "{{baseUrlV1}}/doctors/{{doctorId}}"
+          }
+        },
+        {
+          "name": "Delete Doctor",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrlV1}}/doctors/{{doctorId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Encounters",
+      "item": [
+        {
+          "name": "Create Encounter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response._id) {",
+                  "        pm.collectionVariables.set('encounterId', response._id);",
+                  "        console.log('✅ Encounter created:', response._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"ABCD-1234-EFGH-5678\",\n  \"doctorId\": \"{{doctorId}}\",\n  \"hospitalId\": \"{{hospitalId}}\",\n  \"visitReason\": \"Chest pain and breathing difficulty\",\n  \"diagnosis\": \"Acute Myocardial Infarction\",\n  \"prescriptions\": {\n    \"medications\": [\n      {\n        \"name\": \"Aspirin\",\n        \"dosage\": \"75mg\",\n        \"frequency\": \"Once daily\",\n        \"duration\": \"Ongoing\"\n      },\n      {\n        \"name\": \"Atorvastatin\",\n        \"dosage\": \"40mg\",\n        \"frequency\": \"Once daily at night\",\n        \"duration\": \"3 months\"\n      }\n    ],\n    \"instructions\": \"Take medications after meals. Follow up in 2 weeks.\"\n  },\n  \"vitals\": {\n    \"bloodPressure\": \"140/90\",\n    \"heartRate\": 85,\n    \"temperature\": 98.6,\n    \"weight\": 75,\n    \"height\": 170,\n    \"spo2\": 95\n  }\n}"
+            },
+            "url": "{{baseUrlV1}}/encounters"
+          }
+        },
+        {
+          "name": "Get All Encounters",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/encounters?page=1&limit=10",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["encounters"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Encounter by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/encounters/{{encounterId}}"
+          }
+        },
+        {
+          "name": "Update Encounter",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"diagnosis\": \"Acute Myocardial Infarction - Stable condition\",\n  \"vitals\": {\n    \"bloodPressure\": \"130/85\",\n    \"heartRate\": 78,\n    \"temperature\": 98.4,\n    \"weight\": 75,\n    \"height\": 170,\n    \"spo2\": 97\n  }\n}"
+            },
+            "url": "{{baseUrlV1}}/encounters/{{encounterId}}"
+          }
+        },
+        {
+          "name": "Delete Encounter",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrlV1}}/encounters/{{encounterId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Documents",
+      "item": [
+        {
+          "name": "Create Health Document",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response._id) {",
+                  "        pm.collectionVariables.set('documentId', response._id);",
+                  "        console.log('✅ Health document created:', response._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"ABCD-1234-EFGH-5678\",\n  \"hospitalId\": \"{{hospitalId}}\",\n  \"encounterId\": \"{{encounterId}}\",\n  \"docType\": \"Lab Report\",\n  \"fileUrl\": \"https://s3.amazonaws.com/health-docs/lab-report-123.pdf\",\n  \"metadata\": {\n    \"testName\": \"Complete Blood Count\",\n    \"testDate\": \"2024-01-15\",\n    \"fileSize\": \"256KB\",\n    \"mimeType\": \"application/pdf\"\n  }\n}"
+            },
+            "url": "{{baseUrl}}/healthdocuments"
+          }
+        },
+        {
+          "name": "Get All Health Documents",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/healthdocuments?page=1&limit=10",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["health-documents"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Health Document by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/healthdocuments/{{documentId}}"
+          }
+        },
+        {
+          "name": "Update Health Document",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"docType\": \"Lab Report - Updated\",\n  \"metadata\": {\n    \"testName\": \"Complete Blood Count (Revised)\",\n    \"testDate\": \"2024-01-15\",\n    \"fileSize\": \"256KB\",\n    \"mimeType\": \"application/pdf\",\n    \"revised\": true\n  }\n}"
+            },
+            "url": "{{baseUrl}}/healthdocuments/{{documentId}}"
+          }
+        },
+        {
+          "name": "Delete Health Document",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/healthdocuments/{{documentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consents",
+      "item": [
+        {
+          "name": "Create Consent",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response._id) {",
+                  "        pm.collectionVariables.set('consentId', response._id);",
+                  "        console.log('✅ Consent created:', response._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"ABCD-1234-EFGH-5678\",\n  \"doctorId\": \"{{doctorId}}\",\n  \"hospitalId\": \"{{hospitalId}}\",\n  \"scope\": [\"view_encounters\", \"view_documents\", \"view_prescriptions\"],\n  \"expiresAt\": \"2024-12-31T23:59:59.999Z\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrlV1}}/consents"
+          }
+        },
+        {
+          "name": "Get All Consents",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/consents?page=1&limit=10",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["consents"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Consent by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/consents/{{consentId}}"
+          }
+        },
+        {
+          "name": "Update Consent",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scope\": [\"view_encounters\", \"view_documents\", \"view_prescriptions\", \"view_vitals\"],\n  \"expiresAt\": \"2025-06-30T23:59:59.999Z\"\n}"
+            },
+            "url": "{{baseUrlV1}}/consents/{{consentId}}"
+          }
+        },
+        {
+          "name": "Emergency Consent - Request OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"ABCD-1234-EFGH-5678\",\n  \"doctorId\": \"{{doctorId}}\",\n  \"hospitalId\": \"{{hospitalId}}\",\n  \"emergencyReason\": \"Patient unconscious, immediate access required\"\n}"
+            },
+            "url": "{{baseUrlV1}}/consents/emergency/request-otp",
+            "description": "Request emergency access OTP for critical situations"
+          }
+        },
+        {
+          "name": "Emergency Consent - Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"ABCD-1234-EFGH-5678\",\n  \"doctorId\": \"{{doctorId}}\",\n  \"hospitalId\": \"{{hospitalId}}\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": "{{baseUrlV1}}/consents/emergency/verify-otp",
+            "description": "Verify emergency OTP and grant temporary access"
+          }
+        },
+        {
+          "name": "Emergency Consent - Override",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": \"ABCD-1234-EFGH-5678\",\n  \"doctorId\": \"{{doctorId}}\",\n  \"hospitalId\": \"{{hospitalId}}\",\n  \"overrideReason\": \"Life-threatening emergency - patient unconscious\",\n  \"adminApproval\": true\n}"
+            },
+            "url": "{{baseUrlV1}}/consents/emergency/override",
+            "description": "Admin override for emergency access without OTP"
+          }
+        },
+        {
+          "name": "Delete Consent",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrlV1}}/consents/{{consentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit Logs",
+      "item": [
+        {
+          "name": "Create Audit Log",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{doctorId}}\",\n  \"action\": \"VIEW_PATIENT_RECORD\",\n  \"resource\": \"patient\",\n  \"resourceId\": \"ABCD-1234-EFGH-5678\",\n  \"ipAddress\": \"192.168.1.100\",\n  \"details\": {\n    \"userRole\": \"doctor\",\n    \"hospitalId\": \"{{hospitalId}}\",\n    \"consentId\": \"{{consentId}}\",\n    \"accessReason\": \"Regular checkup\"\n  }\n}"
+            },
+            "url": "{{baseUrl}}/auditlogs",
+            "description": "Manual audit log creation (usually automatic)"
+          }
+        },
+        {
+          "name": "Get All Audit Logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/auditlogs?page=1&limit=10",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["audit-logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Audit Log by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/auditlogs/{{auditLogId}}"
+          }
+        },
+        {
+          "name": "Delete Audit Log",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/auditlogs/{{auditLogId}}",
+            "description": "Super admin only - for cleanup"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Offline Sync",
+      "item": [
+        {
+          "name": "Queue Operation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{doctorId}}\",\n  \"deviceId\": \"device-123-abc-456\",\n  \"operation\": \"CREATE\",\n  \"resourceType\": \"encounter\",\n  \"resourceId\": null,\n  \"payload\": {\n    \"patientId\": \"ABCD-1234-EFGH-5678\",\n    \"doctorId\": \"{{doctorId}}\",\n    \"hospitalId\": \"{{hospitalId}}\",\n    \"visitReason\": \"Follow-up consultation\",\n    \"diagnosis\": \"Improving condition\",\n    \"vitals\": {\n      \"bloodPressure\": \"120/80\",\n      \"heartRate\": 72\n    }\n  },\n  \"timestamp\": \"2024-01-20T10:30:00.000Z\",\n  \"version\": 1\n}"
+            },
+            "url": "{{baseUrlV1}}/sync/queue",
+            "description": "Queue operations for offline sync"
+          }
+        },
+        {
+          "name": "Get Pending Sync",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/sync/pending?deviceId=device-123-abc-456&userId={{doctorId}}",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["sync", "pending"],
+              "query": [
+                {
+                  "key": "deviceId",
+                  "value": "device-123-abc-456"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{doctorId}}"
+                }
+              ]
+            },
+            "description": "Get pending operations for sync"
+          }
+        },
+        {
+          "name": "Process Sync Queue",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/sync/process/{{syncQueueId}}",
+            "description": "Process a queued operation"
+          }
+        },
+        {
+          "name": "Resolve Conflict",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrlV1}}/sync/resolve/{{syncQueueId}}?resolution=CLIENT_WINS",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["sync", "resolve", "{{syncQueueId}}"],
+              "query": [
+                {
+                  "key": "resolution",
+                  "value": "CLIENT_WINS",
+                  "description": "CLIENT_WINS, SERVER_WINS, or MANUAL"
+                }
+              ]
+            },
+            "description": "Resolve sync conflicts"
+          }
+        },
+        {
+          "name": "Retry Failed Sync",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrlV1}}/sync/retry?deviceId=device-123-abc-456&userId={{doctorId}}",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["sync", "retry"],
+              "query": [
+                {
+                  "key": "deviceId",
+                  "value": "device-123-abc-456"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{doctorId}}"
+                }
+              ]
+            },
+            "description": "Retry all failed operations"
+          }
+        },
+        {
+          "name": "Get Sync Stats",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/sync/stats?userId={{doctorId}}",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["sync", "stats"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{doctorId}}",
+                  "description": "Optional user filter"
+                }
+              ]
+            },
+            "description": "Get sync statistics (admin only)"
+          }
+        },
+        {
+          "name": "Cleanup Old Synced Items",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrlV1}}/sync/cleanup?days=30",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["sync", "cleanup"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30",
+                  "description": "Delete items older than N days"
+                }
+              ]
+            },
+            "description": "Cleanup old synced items (super admin only)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"prescription_expiring\",\n  \"priority\": \"high\",\n  \"recipientId\": \"{{patientId}}\",\n  \"title\": \"Prescription Expiring Soon\",\n  \"message\": \"Your prescription for Amoxicillin will expire in 3 days. Please renew it.\",\n  \"shortMessage\": \"Prescription expiring in 3 days\",\n  \"channels\": [\"in_app\", \"email\"],\n  \"category\": \"prescriptions\",\n  \"relatedEntityModel\": \"Prescription\",\n  \"deepLink\": \"healthapp://prescription/123\",\n  \"webLink\": \"https://app.example.com/prescriptions/123\",\n  \"actions\": [\n    {\n      \"label\": \"Renew Now\",\n      \"action\": \"renew_prescription\",\n      \"style\": \"primary\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications",
+            "description": "Create a new notification (Doctor, Hospital Admin, Super Admin only)"
+          }
+        },
+        {
+          "name": "Create Bulk Notifications",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipientIds\": [\"{{patientId}}\"],\n  \"type\": \"system_maintenance\",\n  \"priority\": \"normal\",\n  \"title\": \"System Maintenance Notice\",\n  \"message\": \"System will be under maintenance from 2 AM to 4 AM on Sunday.\",\n  \"channels\": [\"in_app\", \"email\"],\n  \"category\": \"system\"\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications/bulk",
+            "description": "Send notifications to multiple users at once (Hospital Admin, Super Admin only)"
+          }
+        },
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/notifications?page=1&limit=20&status=sent&priority=high",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "sent",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "prescription_expiring",
+                  "disabled": true
+                },
+                {
+                  "key": "priority",
+                  "value": "high",
+                  "disabled": true
+                },
+                {
+                  "key": "isRead",
+                  "value": "false",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all notifications with optional filters"
+          }
+        },
+        {
+          "name": "Get My Unread Notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/notifications/me/unread?limit=50",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["notifications", "me", "unread"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Get my unread notifications"
+          }
+        },
+        {
+          "name": "Get My Notification Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/notifications/me/stats",
+            "description": "Get notification statistics (total, unread, read, by type, by priority)"
+          }
+        },
+        {
+          "name": "Mark All My Notifications as Read",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/notifications/me/mark-all-read",
+            "description": "Mark all my notifications as read"
+          }
+        },
+        {
+          "name": "Mark Many as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\"notification_id_1\", \"notification_id_2\"]\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications/mark-many-read",
+            "description": "Mark multiple notifications as read at once"
+          }
+        },
+        {
+          "name": "Get Notification by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/notifications/{{notificationId}}",
+            "description": "Get a single notification by ID"
+          }
+        },
+        {
+          "name": "Update Notification",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"read\",\n  \"readAt\": \"2024-12-07T14:30:00Z\"\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications/{{notificationId}}",
+            "description": "Update notification (Hospital Admin, Super Admin only)"
+          }
+        },
+        {
+          "name": "Mark as Read",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/notifications/{{notificationId}}/mark-read",
+            "description": "Mark a notification as read"
+          }
+        },
+        {
+          "name": "Acknowledge Notification",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/notifications/{{notificationId}}/acknowledge",
+            "description": "Acknowledge a notification that requires acknowledgment"
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrlV1}}/notifications/{{notificationId}}",
+            "description": "Delete a notification (soft delete) (Hospital Admin, Super Admin only)"
+          }
+        },
+        {
+          "name": "Bulk Delete Notifications",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\"notification_id_1\", \"notification_id_2\", \"notification_id_3\"]\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications/bulk/delete",
+            "description": "Delete multiple notifications at once (Hospital Admin, Super Admin only)"
+          }
+        },
+        {
+          "name": "Get My Preferences",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/notifications/preferences/me",
+            "description": "Get my notification preferences"
+          }
+        },
+        {
+          "name": "Update My Preferences",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true,\n  \"preferredChannels\": [\"in_app\", \"email\"],\n  \"quietHours\": {\n    \"enabled\": true,\n    \"startTime\": \"22:00\",\n    \"endTime\": \"08:00\",\n    \"excludeTypes\": [\"security_alert\", \"lab_result_critical\"]\n  },\n  \"enableGrouping\": true,\n  \"language\": \"en\",\n  \"timezone\": \"Asia/Kolkata\"\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications/preferences/me",
+            "description": "Update my notification preferences"
+          }
+        },
+        {
+          "name": "Add Device Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"fcm-device-token-abc123xyz\"\n}"
+            },
+            "url": "{{baseUrlV1}}/notifications/preferences/me/device-token",
+            "description": "Add a device token for push notifications"
+          }
+        },
+        {
+          "name": "Remove Device Token",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrlV1}}/notifications/preferences/me/device-token/fcm-device-token-abc123xyz",
+            "description": "Remove a device token"
+          }
+        },
+        {
+          "name": "[Admin] Process Scheduled Notifications",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/notifications/admin/process-scheduled",
+            "description": "Process scheduled notifications ready to be sent (Super Admin only)"
+          }
+        },
+        {
+          "name": "[Admin] Process Expired Notifications",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/notifications/admin/process-expired",
+            "description": "Mark expired notifications (Super Admin only)"
+          }
+        },
+        {
+          "name": "[Admin] Cleanup Old Notifications",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrlV1}}/notifications/admin/cleanup?daysOld=90",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["notifications", "admin", "cleanup"],
+              "query": [
+                {
+                  "key": "daysOld",
+                  "value": "90",
+                  "description": "Delete notifications older than X days (default: 90)"
+                }
+              ]
+            },
+            "description": "Cleanup old read notifications (Super Admin only)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Prescriptions",
+      "item": [
+        {
+          "name": "Create Prescription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientGuid\": \"ABCD-1234-EFGH-5678\",\n  \"patient\": \"{{patientId}}\",\n  \"prescriber\": \"{{doctorId}}\",\n  \"organization\": \"{{hospitalId}}\",\n  \"medicationName\": \"Amoxicillin\",\n  \"genericName\": \"Amoxicillin\",\n  \"medicationCode\": \"RX12345\",\n  \"medicationCodeSystem\": \"RxNorm\",\n  \"dosageInstruction\": [\n    {\n      \"sequence\": 1,\n      \"text\": \"Take 500mg orally three times daily for 7 days\",\n      \"route\": \"oral\",\n      \"doseQuantityValue\": 500,\n      \"doseQuantityUnit\": \"mg\",\n      \"frequency\": \"TID\",\n      \"duration\": 7,\n      \"durationUnit\": \"d\"\n    }\n  ],\n  \"dispenseRequest\": {\n    \"numberOfRepeatsAllowed\": 2,\n    \"quantityValue\": 21,\n    \"quantityUnit\": \"tablet\",\n    \"expectedSupplyDuration\": 7,\n    \"expectedSupplyDurationUnit\": \"d\"\n  },\n  \"substitutionAllowance\": {\n    \"allowed\": true,\n    \"reason\": \"Cost savings\"\n  },\n  \"authoredOn\": \"2024-12-07T10:00:00Z\",\n  \"intent\": \"order\",\n  \"priority\": \"routine\",\n  \"courseOfTherapy\": \"acute\",\n  \"isControlledSubstance\": false,\n  \"requiresPreauthorization\": false\n}"
+            },
+            "url": "{{baseUrlV1}}/prescriptions",
+            "description": "Create a new prescription (Doctor, Super Admin only)"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.data && response.data._id) {",
+                  "        pm.collectionVariables.set('prescriptionId', response.data._id);",
+                  "        console.log('✅ Prescription ID saved:', response.data._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Prescriptions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/prescriptions?page=1&limit=20&status=active",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["prescriptions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true
+                },
+                {
+                  "key": "patient",
+                  "value": "{{patientId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "prescriber",
+                  "value": "{{doctorId}}",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all prescriptions with filters"
+          }
+        },
+        {
+          "name": "Get Active Prescriptions for Patient",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/prescriptions/patient/{{patientId}}/active",
+            "description": "Get all active prescriptions for a specific patient"
+          }
+        },
+        {
+          "name": "Get Prescriptions Needing Refill",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/prescriptions/patient/{{patientId}}/needing-refill",
+            "description": "Get prescriptions that need refill (≤1 refill remaining)"
+          }
+        },
+        {
+          "name": "Get Patient Prescription Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/prescriptions/patient/{{patientId}}/stats",
+            "description": "Get prescription statistics for a patient"
+          }
+        },
+        {
+          "name": "Get Prescriptions by Encounter",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/prescriptions/encounter/{{encounterId}}",
+            "description": "Get all prescriptions for a specific encounter"
+          }
+        },
+        {
+          "name": "Get Expiring Prescriptions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/prescriptions/expiring?days=7",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["prescriptions", "expiring"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "7",
+                  "description": "Days ahead to check (default: 30)"
+                }
+              ]
+            },
+            "description": "Get prescriptions expiring soon"
+          }
+        },
+        {
+          "name": "Search Prescriptions by Medication",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrlV1}}/prescriptions/search?medication=Amoxicillin",
+              "host": ["{{baseUrlV1}}"],
+              "path": ["prescriptions", "search"],
+              "query": [
+                {
+                  "key": "medication",
+                  "value": "Amoxicillin"
+                }
+              ]
+            },
+            "description": "Full-text search prescriptions by medication name"
+          }
+        },
+        {
+          "name": "Get Prescription by Number",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/prescriptions/number/RX-2024-000001",
+            "description": "Get prescription by unique prescription number (RX-YYYY-NNNNNN format)"
+          }
+        },
+        {
+          "name": "Get Prescription by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}",
+            "description": "Get a single prescription by MongoDB ID"
+          }
+        },
+        {
+          "name": "Update Prescription",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Updated dosage instructions\",\n  \"dispenseRequest\": {\n    \"numberOfRepeatsAllowed\": 3\n  }\n}"
+            },
+            "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}",
+            "description": "Update prescription (Doctor, Super Admin only). Cannot update completed/cancelled/stopped prescriptions."
+          }
+        },
+        {
+          "name": "Cancel Prescription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Patient requested cancellation\"\n}"
+            },
+            "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}/cancel",
+            "description": "Cancel a prescription with reason (Doctor, Super Admin only)"
+          }
+        },
+        {
+          "name": "Stop Prescription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Treatment completed successfully\"\n}"
+            },
+            "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}/stop",
+            "description": "Stop prescription for therapeutic reasons (Doctor, Super Admin only)"
+          }
+        },
+        {
+          "name": "Mark Prescription as Dispensed",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}/dispense",
+            "description": "Mark prescription as dispensed (Hospital Admin, Super Admin only). Auto-completes when refills exhausted."
+          }
+        },
+        {
+          "name": "Delete Prescription",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrlV1}}/prescriptions/{{prescriptionId}}",
+            "description": "Delete prescription (soft delete, only draft/entered-in-error) (Doctor, Super Admin only)"
+          }
+        }
+      ]
+    }
+  ]
+}

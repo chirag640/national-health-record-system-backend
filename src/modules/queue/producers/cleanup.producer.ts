@@ -29,10 +29,7 @@ export class CleanupProducer {
     const job = await this.cleanupQueue.add(
       'temp-file-cleanup',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.LOW,
-        'background',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.LOW, 'background'),
     );
 
     this.logger.log(`Queued temp file cleanup job ${job.id}`);
@@ -46,10 +43,7 @@ export class CleanupProducer {
     const job = await this.cleanupQueue.add(
       'old-job-cleanup',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.LOW,
-        'background',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.LOW, 'background'),
     );
 
     this.logger.log(`Queued old job cleanup job ${job.id} for ${data.queueName}`);
@@ -63,10 +57,7 @@ export class CleanupProducer {
     const job = await this.cleanupQueue.add(
       'session-cleanup',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.NORMAL,
-        'standard',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.NORMAL, 'standard'),
     );
 
     this.logger.log(`Queued session cleanup job ${job.id}`);
@@ -80,10 +71,7 @@ export class CleanupProducer {
     const job = await this.cleanupQueue.add(
       'audit-log-cleanup',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.LOW,
-        'background',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.LOW, 'background'),
     );
 
     this.logger.log(`Queued audit log cleanup job ${job.id}`);
@@ -97,10 +85,7 @@ export class CleanupProducer {
     const job = await this.cleanupQueue.add(
       'database-cleanup',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.NORMAL,
-        'standard',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.NORMAL, 'standard'),
     );
 
     this.logger.log(`Queued database cleanup job ${job.id} for table ${data.table}`);
@@ -114,10 +99,7 @@ export class CleanupProducer {
     const job = await this.cleanupQueue.add(
       'cache-cleanup',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.LOW,
-        'background',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.LOW, 'background'),
     );
 
     this.logger.log(`Queued cache cleanup job ${job.id}`);
@@ -131,10 +113,7 @@ export class CleanupProducer {
     const job = await this.cleanupQueue.add(
       'orphaned-records',
       data,
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.LOW,
-        'background',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.LOW, 'background'),
     );
 
     this.logger.log(`Queued orphaned records cleanup job ${job.id} for ${data.entity}`);
@@ -149,10 +128,7 @@ export class CleanupProducer {
     const job = await this.cleanupQueue.add(
       's3-temp-cleanup',
       { olderThanHours },
-      this.queueConfig.buildJobOptions(
-        this.queueConfig.PRIORITY.LOW,
-        'background',
-      ),
+      this.queueConfig.buildJobOptions(this.queueConfig.PRIORITY.LOW, 'background'),
     );
 
     this.logger.log(`Queued S3 temp cleanup job ${job.id}`);
@@ -196,7 +172,7 @@ export class CleanupProducer {
    */
   async getJobStatus(jobId: string) {
     const job = await this.cleanupQueue.getJob(jobId);
-    
+
     if (!job) {
       return null;
     }

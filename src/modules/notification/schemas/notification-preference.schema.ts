@@ -74,7 +74,6 @@ export class NotificationPreference {
     ref: 'User',
     required: true,
     unique: true,
-    index: true,
   })
   userId!: MongooseSchema.Types.ObjectId;
 

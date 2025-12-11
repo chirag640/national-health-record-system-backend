@@ -51,7 +51,7 @@ export class EmailService {
       });
 
       this.logger.log(`Email sent successfully to ${options.to} (template: ${options.template})`);
-    } catch (error) {
+    } catch (error: any) {
       const err = error as Error;
       this.logger.error(`Failed to send email to ${options.to}:`, err.message, err.stack);
       throw new Error(`Email sending failed: ${err.message}`);
