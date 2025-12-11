@@ -26,6 +26,7 @@ import { SyncModule } from './modules/sync/sync.module';
 import { AppointmentModule } from './modules/appointment/appointment.module';
 import { PrescriptionModule } from './modules/prescription/prescription.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { LabReportModule } from './modules/lab-report/lab-report.module';
 import { TelemedicineModule } from './modules/telemedicine/telemedicine.module';
 import { BillingModule } from './modules/billing/billing.module';
@@ -79,6 +80,7 @@ import { MedicalHistoryModule } from './modules/medical-history/medical-history.
     AppointmentModule, // Appointment management system
     PrescriptionModule, // Prescription management system
     NotificationModule, // Enhanced notification system with multi-channel support
+    NotificationsModule, // Real-time WebSocket notifications (Phase 4A)
     LabReportModule, // Lab reports and test results management system
     TelemedicineModule, // Telemedicine with video consultations and real-time chat
     BillingModule, // Billing, invoicing, and payment processing with Razorpay integration
