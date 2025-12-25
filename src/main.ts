@@ -163,13 +163,14 @@ async function startServer() {
   const app = await bootstrap();
 
   const port = process.env.PORT || 3000;
-  await app.listen(port);
+  // Listen on all interfaces (0.0.0.0) so Android emulator can connect via 10.0.2.2
+  await app.listen(port, '0.0.0.0');
 
   // Enable graceful shutdown for containerized environments
   app.enableShutdownHooks();
 
   const logger = app.get(Logger);
-  logger.log(`🚀 Application is running on: http://localhost:${port}`);
+  logger.log(`🚀 Application is running on: http://0.0.0.0:${port}`);
   logger.log(`📚 Swagger documentation available at: http://localhost:${port}/api/docs`);
   logger.log(`❤️  Health check available at: http://localhost:${port}/health`);
 

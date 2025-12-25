@@ -21,6 +21,8 @@ import {
   LoginWithOtpDto,
   VerifyOtpDto,
   VerifyEmailDto,
+  VerifyRegistrationOtpDto,
+  ResendRegistrationOtpDto,
   RefreshTokenDto,
   ForgotPasswordDto,
   ResetPasswordDto,
@@ -37,7 +39,7 @@ import { Throttle } from '@nestjs/throttler';
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   /**
    * Register a new patient
@@ -189,6 +191,28 @@ export class AuthController {
   @ApiOperation({ summary: 'Reset password using token' })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.newPassword);
+  }
+
+  /**
+   * Verify registration OTP
+   */
+  @Post('verify-registration-otp')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify email with OTP code after registration' })
+  async verifyRegistrationOtp(@Body() dto: VerifyRegistrationOtpDto) {
+    return this.authService.verifyRegistrationOtp(dto.email, dto.otp);
+  }
+
+  /**
+   * Resend registration OTP
+   */
+  @Post('resend-registration-otp')
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resend OTP code for email verification' })
+  async resendRegistrationOtp(@Body() dto: ResendRegistrationOtpDto) {
+    return this.authService.resendRegistrationOtp(dto.email);
   }
 
   /**

@@ -205,6 +205,26 @@ export class LogoutDto {
   refreshToken!: string;
 }
 
+export class VerifyRegistrationOtpDto {
+  @ApiProperty({ example: 'patient@example.com' })
+  @IsEmail()
+  @IsNotEmpty()
+  email!: string;
+
+  @ApiProperty({ example: '123456' })
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^\d{6}$/, { message: 'OTP must be 6 digits' })
+  otp!: string;
+}
+
+export class ResendRegistrationOtpDto {
+  @ApiProperty({ example: 'patient@example.com' })
+  @IsEmail()
+  @IsNotEmpty()
+  email!: string;
+}
+
 export class AuthResponseDto {
   @ApiProperty()
   accessToken!: string;

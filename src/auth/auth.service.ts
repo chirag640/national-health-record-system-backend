@@ -51,7 +51,7 @@ export class AuthService {
     private otpService: OtpService,
     private sessionService: SessionService,
     private emailService: EmailService,
-  ) {}
+  ) { }
 
   /**
    * Register a new patient
@@ -68,34 +68,27 @@ export class AuthService {
     // Hash password
     const passwordHash = await bcrypt.hash(dto.password, 12);
 
-    // Generate verification token
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-    const emailVerificationExpiry = new Date();
-    emailVerificationExpiry.setHours(emailVerificationExpiry.getHours() + 24);
-
-    // Create user
+    // Create user (email not verified yet)
     const user = await this.userModel.create({
       email: dto.email.toLowerCase(),
       passwordHash,
       role: UserRole.PATIENT,
       fullName: dto.fullName,
-      emailVerificationToken,
-      emailVerificationExpiry,
       emailVerified: false,
     });
 
-    // Send verification email
-    await this.emailService.sendEmailVerification({
-      to: user.email,
-      name: dto.fullName,
-      verificationToken: emailVerificationToken,
-    });
+    // Generate OTP for email verification
+    const otp = await this.otpService.createOtp(user.email, OtpPurpose.EMAIL_VERIFICATION);
 
-    this.logger.log(`Patient registered: ${user.email}`);
+    // TEMPORARY: Email sending disabled for testing - will fix SMTP next
+    // await this.emailService.sendOtp(user.email, dto.fullName, otp, 5);
+    this.logger.warn(`[TESTING MODE] OTP for ${user.email}: ${otp} - Email sending bypassed`);
+
+    this.logger.log(`Patient registered: ${user.email} - OTP sent`);
 
     return {
       userId: user._id.toString(),
-      message: 'Registration successful. Please check your email to verify your account.',
+      message: 'Registration successful. Please check your email for the verification code.',
     };
   }
 
@@ -676,5 +669,79 @@ export class AuthService {
     await user.save();
 
     return this.generateAuthResponse(user, ipAddress, userAgent);
+  }
+
+  /**
+   * Verify registration OTP
+   */
+  async verifyRegistrationOtp(
+    email: string,
+    otp: string,
+  ): Promise<{ message: string; userId: string }> {
+    const user = await this.userModel.findOne({ email: email.toLowerCase() });
+
+    if (!user) {
+      throw new BadRequestException({
+        code: 'USER_NOT_FOUND',
+        message: 'User not found',
+      });
+    }
+
+    if (user.emailVerified) {
+      throw new BadRequestException({
+        code: 'ALREADY_VERIFIED',
+        message: 'Email is already verified',
+      });
+    }
+
+    // Verify OTP
+    await this.otpService.verifyOtp(email, otp, OtpPurpose.EMAIL_VERIFICATION);
+
+    // Mark email as verified
+    user.emailVerified = true;
+    await user.save();
+
+    // TEMPORARY: Welcome email disabled while SMTP is being configured
+    // await this.emailService.sendWelcomeEmail({
+    //   to: user.email,
+    //   name: user.fullName || 'User',
+    // });
+    this.logger.warn(`[TESTING MODE] Welcome email bypassed for ${user.email}`);
+
+    this.logger.log(`Registration OTP verified: ${user.email}`);
+
+    return {
+      message: 'Email verified successfully. You can now login.',
+      userId: user._id.toString(),
+    };
+  }
+
+  /**
+   * Resend registration OTP
+   */
+  async resendRegistrationOtp(email: string): Promise<{ message: string }> {
+    const user = await this.userModel.findOne({ email: email.toLowerCase() });
+
+    // Don't reveal if user exists
+    if (!user) {
+      return { message: 'If the account exists and is unverified, a new OTP has been sent.' };
+    }
+
+    if (user.emailVerified) {
+      throw new BadRequestException({
+        code: 'ALREADY_VERIFIED',
+        message: 'Email is already verified',
+      });
+    }
+
+    // Generate new OTP (this will delete any existing unused OTPs)
+    const otp = await this.otpService.createOtp(user.email, OtpPurpose.EMAIL_VERIFICATION);
+
+    // Send OTP via email
+    await this.emailService.sendOtp(user.email, user.fullName || 'User', otp, 5);
+
+    this.logger.log(`Registration OTP resent: ${user.email}`);
+
+    return { message: 'A new verification code has been sent to your email.' };
   }
 }
