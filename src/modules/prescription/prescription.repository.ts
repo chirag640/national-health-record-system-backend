@@ -48,8 +48,15 @@ export class PrescriptionRepository extends BaseRepository<PrescriptionDocument>
 
     const query: FilterQuery<PrescriptionDocument> = { isDeleted: false };
 
+    // If patient param looks like a GUID instead of ObjectId, search by patientGuid field
     if (patient) {
-      query.patient = patient;
+      if (patient.match(/^[0-9a-fA-F]{24}$/)) {
+        // Valid MongoDB ObjectId format
+        query.patient = patient;
+      } else {
+        // Looks like a GUID, search by patientGuid instead
+        query.patientGuid = patient;
+      }
     }
     if (patientGuid) {
       query.patientGuid = patientGuid;

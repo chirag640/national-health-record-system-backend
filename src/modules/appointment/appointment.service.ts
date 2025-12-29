@@ -327,6 +327,175 @@ export class AppointmentService {
   }
 
   /**
+   * Get appointments by date range
+   */
+  async getAppointmentsByDateRange(
+    startDate: string,
+    endDate: string,
+  ): Promise<AppointmentOutputDto[]> {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    const appointments = await this.appointmentRepository.findByDateRange(start, end, 0, 1000);
+    return appointments.map((apt) => this.mapToOutput(apt));
+  }
+
+  /**
+   * Get appointments for a specific patient with pagination
+   */
+  async getPatientAppointments(
+    patientId: string,
+    options: { page?: number; limit?: number; status?: string },
+  ): Promise<PaginatedResponse<AppointmentOutputDto>> {
+    const page = options.page || 1;
+    const limit = options.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const appointments = await this.appointmentRepository.findByPatientIdWithFilters(
+      patientId,
+      options.status,
+      skip,
+      limit,
+    );
+    const total = await this.appointmentRepository.countByPatientId(patientId, options.status);
+
+    return createPaginatedResponse(
+      appointments.map((apt) => this.mapToOutput(apt)),
+      total,
+      page,
+      limit,
+    );
+  }
+
+  /**
+   * Check doctor availability for a specific date
+   */
+  async checkAvailability(
+    doctorId: string,
+    date: string,
+    durationMinutes: number,
+  ): Promise<{ startTime: string; endTime: string; available: boolean }[]> {
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Get existing appointments for the doctor on this date
+    const existingAppointments = await this.appointmentRepository.findByDateRange(
+      targetDate,
+      endOfDay,
+      0,
+      100,
+    );
+
+    const doctorAppointments = existingAppointments
+      .filter(
+        (apt) =>
+          apt.doctorId.toString() === doctorId &&
+          !['cancelled', 'noshow', 'entered-in-error'].includes(apt.status),
+      )
+      .map((apt) => ({
+        startTime: apt.startTime,
+        endTime: apt.endTime,
+      }));
+
+    // Generate time slots from 9 AM to 5 PM (standard working hours)
+    const slots: { startTime: string; endTime: string; available: boolean }[] = [];
+    const workingHoursStart = 9;
+    const workingHoursEnd = 17;
+
+    for (let hour = workingHoursStart; hour < workingHoursEnd; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const slotStart = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        const endHour = minute + durationMinutes >= 60 ? hour + 1 : hour;
+        const endMinute = (minute + durationMinutes) % 60;
+        const slotEnd = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+
+        // Skip if slot extends beyond working hours
+        if (endHour > workingHoursEnd || (endHour === workingHoursEnd && endMinute > 0)) {
+          continue;
+        }
+
+        // Check if slot conflicts with existing appointments
+        const isAvailable = !doctorAppointments.some((apt) => {
+          return !(slotEnd <= apt.startTime || slotStart >= apt.endTime);
+        });
+
+        slots.push({
+          startTime: slotStart,
+          endTime: slotEnd,
+          available: isAvailable,
+        });
+      }
+    }
+
+    return slots;
+  }
+
+  /**
+   * Get appointment statistics
+   */
+  async getAppointmentStats(patientId?: string): Promise<{
+    total: number;
+    upcoming: number;
+    completed: number;
+    cancelled: number;
+    noShow: number;
+  }> {
+    const stats = await this.appointmentRepository.getStats(patientId);
+    return stats;
+  }
+
+  /**
+   * Update appointment status
+   */
+  async updateStatus(id: string, status: string, userId?: string): Promise<AppointmentOutputDto> {
+    const appointment = await this.appointmentRepository.findById(id);
+
+    if (!appointment) {
+      throw new NotFoundException(`Appointment with ID ${id} not found`);
+    }
+
+    const validStatuses = [
+      'proposed',
+      'pending',
+      'booked',
+      'arrived',
+      'checked-in',
+      'fulfilled',
+      'cancelled',
+      'noshow',
+      'waitlist',
+    ];
+
+    if (!validStatuses.includes(status)) {
+      throw new BadRequestException(`Invalid status: ${status}`);
+    }
+
+    const updateData: any = { status };
+
+    if (status === 'cancelled' && userId) {
+      updateData.cancellationDate = new Date();
+      updateData.cancelledBy = new Types.ObjectId(userId);
+    }
+
+    if (status === 'checked-in') {
+      updateData.checkInTime = new Date();
+    }
+
+    if (status === 'fulfilled') {
+      updateData.checkOutTime = new Date();
+    }
+
+    const updated = await this.appointmentRepository.update(id, updateData);
+    this.logger.log(`Appointment status updated: ${id} -> ${status}`);
+
+    return this.mapToOutput(updated!);
+  }
+
+  /**
    * Delete appointment (soft delete)
    */
   async remove(id: string): Promise<void> {
@@ -369,11 +538,39 @@ export class AppointmentService {
    * Map database model to output DTO
    */
   private mapToOutput(item: any): AppointmentOutputDto {
+    // Handle populated doctor data
+    const doctor =
+      item.doctorId && typeof item.doctorId === 'object'
+        ? {
+            id: item.doctorId._id?.toString(),
+            name: item.doctorId.fullName,
+            specialty: item.doctorId.specialization,
+            phone: item.doctorId.phone,
+          }
+        : undefined;
+
+    // Handle populated hospital data
+    const hospital =
+      item.hospitalId && typeof item.hospitalId === 'object'
+        ? {
+            id: item.hospitalId._id?.toString(),
+            name: item.hospitalId.name,
+            state: item.hospitalId.state,
+            district: item.hospitalId.district,
+          }
+        : undefined;
+
     return {
       id: item._id.toString(),
       patientId: item.patientId,
-      doctorId: item.doctorId?.toString(),
-      hospitalId: item.hospitalId?.toString(),
+      doctorId:
+        typeof item.doctorId === 'object'
+          ? item.doctorId._id?.toString()
+          : item.doctorId?.toString(),
+      hospitalId:
+        typeof item.hospitalId === 'object'
+          ? item.hospitalId._id?.toString()
+          : item.hospitalId?.toString(),
       status: item.status,
       appointmentType: item.appointmentType,
       priority: item.priority,
@@ -396,6 +593,8 @@ export class AppointmentService {
       encounterId: item.encounterId?.toString(),
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
+      doctor,
+      hospital,
     };
   }
 }

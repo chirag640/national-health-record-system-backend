@@ -51,7 +51,7 @@ export class AuthService {
     private otpService: OtpService,
     private sessionService: SessionService,
     private emailService: EmailService,
-  ) { }
+  ) {}
 
   /**
    * Register a new patient

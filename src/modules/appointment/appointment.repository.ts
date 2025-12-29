@@ -22,6 +22,8 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
   async findAll(skip: number = 0, limit: number = 10): Promise<AppointmentDocument[]> {
     return this.appointmentModel
       .find()
+      .populate('doctorId', 'fullName specialization phone')
+      .populate('hospitalId', 'name state district')
       .skip(skip)
       .limit(limit)
       .sort({ appointmentDate: -1, startTime: -1 })
@@ -29,7 +31,11 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
   }
 
   async findById(id: string): Promise<AppointmentDocument | null> {
-    return this.appointmentModel.findById(id).exec();
+    return this.appointmentModel
+      .findById(id)
+      .populate('doctorId', 'fullName specialization phone')
+      .populate('hospitalId', 'name state district')
+      .exec();
   }
 
   async update(
@@ -58,6 +64,8 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
   ): Promise<Appointment[]> {
     return this.appointmentModel
       .find({ patientId })
+      .populate('doctorId', 'fullName specialization phone')
+      .populate('hospitalId', 'name state district')
       .skip(skip)
       .limit(limit)
       .sort({ appointmentDate: -1, startTime: -1 })
@@ -74,6 +82,8 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
   ): Promise<Appointment[]> {
     return this.appointmentModel
       .find({ doctorId })
+      .populate('doctorId', 'fullName specialization phone')
+      .populate('hospitalId', 'name state district')
       .skip(skip)
       .limit(limit)
       .sort({ appointmentDate: 1, startTime: 1 })
@@ -90,6 +100,8 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
   ): Promise<Appointment[]> {
     return this.appointmentModel
       .find({ hospitalId })
+      .populate('doctorId', 'fullName specialization phone')
+      .populate('hospitalId', 'name state district')
       .skip(skip)
       .limit(limit)
       .sort({ appointmentDate: -1, startTime: -1 })
@@ -183,7 +195,79 @@ export class AppointmentRepository extends BaseRepository<AppointmentDocument> {
         },
         status: { $nin: ['cancelled', 'noshow', 'fulfilled'] },
       })
+      .populate('doctorId', 'fullName specialization phone')
+      .populate('hospitalId', 'name state district')
       .sort({ appointmentDate: 1, startTime: 1 })
       .exec();
+  }
+
+  /**
+   * Find appointments by patient ID with optional status filter
+   */
+  async findByPatientIdWithFilters(
+    patientId: string,
+    status?: string,
+    skip: number = 0,
+    limit: number = 10,
+  ): Promise<Appointment[]> {
+    const query: any = { patientId };
+    if (status) {
+      query.status = status;
+    }
+
+    return this.appointmentModel
+      .find(query)
+      .populate('doctorId', 'fullName specialization phone')
+      .populate('hospitalId', 'name state district')
+      .skip(skip)
+      .limit(limit)
+      .sort({ appointmentDate: -1, startTime: -1 })
+      .exec();
+  }
+
+  /**
+   * Count appointments by patient ID with optional status filter
+   */
+  async countByPatientId(patientId: string, status?: string): Promise<number> {
+    const query: any = { patientId };
+    if (status) {
+      query.status = status;
+    }
+    return this.appointmentModel.countDocuments(query).exec();
+  }
+
+  /**
+   * Get appointment statistics
+   */
+  async getStats(patientId?: string): Promise<{
+    total: number;
+    upcoming: number;
+    completed: number;
+    cancelled: number;
+    noShow: number;
+  }> {
+    const baseQuery: any = {};
+    if (patientId) {
+      baseQuery.patientId = patientId;
+    }
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const [total, upcoming, completed, cancelled, noShow] = await Promise.all([
+      this.appointmentModel.countDocuments(baseQuery).exec(),
+      this.appointmentModel
+        .countDocuments({
+          ...baseQuery,
+          appointmentDate: { $gte: now },
+          status: { $nin: ['cancelled', 'noshow', 'fulfilled'] },
+        })
+        .exec(),
+      this.appointmentModel.countDocuments({ ...baseQuery, status: 'fulfilled' }).exec(),
+      this.appointmentModel.countDocuments({ ...baseQuery, status: 'cancelled' }).exec(),
+      this.appointmentModel.countDocuments({ ...baseQuery, status: 'noshow' }).exec(),
+    ]);
+
+    return { total, upcoming, completed, cancelled, noShow };
   }
 }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
@@ -14,6 +14,13 @@ import { S3LifecycleModule } from './modules/s3-lifecycle/s3-lifecycle.module';
 import { EncryptionModule } from './common/encryption.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+// Production-grade security & monitoring modules
+import { SecurityModule } from './common/security/security.module';
+import { DatabaseModule } from './common/database/database.module';
+import { MonitoringModule } from './common/monitoring/monitoring.module';
+import { HealthModule as EnhancedHealthModule } from './common/health/health.module';
+import { ValidationModule } from './common/validation/validation.module';
+import { SecurityHeadersMiddleware } from './common/security/security-headers.middleware';
 // Generated model modules
 import { PatientModule } from './modules/patient/patient.module';
 import { HospitalModule } from './modules/hospital/hospital.module';
@@ -85,8 +92,18 @@ import { MedicalHistoryModule } from './modules/medical-history/medical-history.
     TelemedicineModule, // Telemedicine with video consultations and real-time chat
     BillingModule, // Billing, invoicing, and payment processing with Razorpay integration
     MedicalHistoryModule, // Comprehensive medical history tracking (allergies, conditions, surgeries, immunizations, vitals, family history)
+    // Production-grade infrastructure
+    SecurityModule, // Password policies, PII sanitization, rate limiting
+    DatabaseModule, // Database indexes optimization
+    MonitoringModule, // Sentry error tracking with HIPAA compliance
+    EnhancedHealthModule, // Comprehensive health checks for K8s probes
+    ValidationModule, // Input sanitization and validation
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
+  }
+}

@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Patch,
+  Put,
   Param,
   Delete,
   HttpCode,
@@ -11,7 +12,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AppointmentService } from './appointment.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -84,6 +85,86 @@ export class AppointmentController {
     return this.appointmentService.getDoctorSchedule(doctorId, date);
   }
 
+  @Get('range')
+  @Roles(UserRole.PATIENT, UserRole.DOCTOR, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Get appointments by date range',
+    description: 'Returns appointments within a specified date range',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: true,
+    type: String,
+    description: 'Start date (ISO 8601)',
+  })
+  @ApiQuery({ name: 'endDate', required: true, type: String, description: 'End date (ISO 8601)' })
+  @ApiResponse({ status: 200, description: 'Appointments retrieved successfully' })
+  getAppointmentsByDateRange(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ): Promise<AppointmentOutputDto[]> {
+    return this.appointmentService.getAppointmentsByDateRange(startDate, endDate);
+  }
+
+  @Get('patient/:patientId')
+  @Roles(UserRole.PATIENT, UserRole.DOCTOR, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Get appointments for a specific patient',
+    description: 'Returns paginated appointments for the specified patient',
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
+  @ApiQuery({ name: 'status', required: false, type: String, description: 'Filter by status' })
+  @ApiResponse({ status: 200, description: 'Patient appointments retrieved' })
+  getPatientAppointments(
+    @Param('patientId') patientId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('status') status?: string,
+  ) {
+    return this.appointmentService.getPatientAppointments(patientId, { page, limit, status });
+  }
+
+  @Get('check-availability')
+  @Roles(UserRole.PATIENT, UserRole.DOCTOR, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Check doctor availability',
+    description: 'Returns available time slots for a doctor on a specific date',
+  })
+  @ApiQuery({ name: 'doctorId', required: true, type: String, description: 'Doctor ID' })
+  @ApiQuery({ name: 'date', required: true, type: String, description: 'Date to check (ISO 8601)' })
+  @ApiQuery({
+    name: 'duration',
+    required: false,
+    type: Number,
+    description: 'Appointment duration in minutes',
+  })
+  @ApiResponse({ status: 200, description: 'Available slots retrieved' })
+  checkAvailability(
+    @Query('doctorId') doctorId: string,
+    @Query('date') date: string,
+    @Query('duration') duration?: number,
+  ) {
+    return this.appointmentService.checkAvailability(doctorId, date, duration || 30);
+  }
+
+  @Get('stats')
+  @Roles(UserRole.PATIENT, UserRole.DOCTOR, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Get appointment statistics',
+    description: 'Returns statistics about appointments, optionally filtered by patient',
+  })
+  @ApiQuery({
+    name: 'patientId',
+    required: false,
+    type: String,
+    description: 'Filter stats by patient ID',
+  })
+  @ApiResponse({ status: 200, description: 'Appointment statistics retrieved' })
+  getAppointmentStats(@Query('patientId') patientId?: string) {
+    return this.appointmentService.getAppointmentStats(patientId);
+  }
+
   @Get(':id')
   @Roles(UserRole.PATIENT, UserRole.DOCTOR, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
   @ApiOperation({
@@ -111,6 +192,39 @@ export class AppointmentController {
     @CurrentUser('userId') userId: string,
   ): Promise<AppointmentOutputDto> {
     return this.appointmentService.update(id, dto, userId);
+  }
+
+  @Put(':id')
+  @Roles(UserRole.PATIENT, UserRole.DOCTOR, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Update appointment (PUT)',
+    description: 'Update appointment details using PUT method for frontend compatibility',
+  })
+  @ApiResponse({ status: 200, description: 'Appointment updated successfully' })
+  @ApiResponse({ status: 404, description: 'Appointment not found' })
+  @ApiResponse({ status: 400, description: 'Invalid update or time conflict' })
+  updatePut(
+    @Param('id') id: string,
+    @Body() dto: UpdateAppointmentDto,
+    @CurrentUser('userId') userId: string,
+  ): Promise<AppointmentOutputDto> {
+    return this.appointmentService.update(id, dto, userId);
+  }
+
+  @Put(':id/status')
+  @Roles(UserRole.PATIENT, UserRole.DOCTOR, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Update appointment status',
+    description: 'Update only the status of an appointment',
+  })
+  @ApiResponse({ status: 200, description: 'Appointment status updated successfully' })
+  @ApiResponse({ status: 404, description: 'Appointment not found' })
+  updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: string,
+    @CurrentUser('userId') userId: string,
+  ): Promise<AppointmentOutputDto> {
+    return this.appointmentService.updateStatus(id, status, userId);
   }
 
   @Post(':id/cancel')

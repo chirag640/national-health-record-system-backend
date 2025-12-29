@@ -10,6 +10,8 @@ import {
   HttpStatus,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
   Res,
 } from '@nestjs/common';
 import {
@@ -19,7 +21,10 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { PatientService } from './patient.service';
 import { PatientIdCardService } from './patient-id-card.service';
@@ -171,6 +176,64 @@ export class PatientController {
     });
 
     res.send(pdfBuffer);
+  }
+
+  @Post(':id/photo')
+  @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.PATIENT, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @UseInterceptors(FileInterceptor('photo'))
+  @ApiOperation({
+    summary: 'Upload patient profile photo',
+    description:
+      'Upload a profile photo for the patient. Supported formats: JPEG, PNG. Max size: 5MB.',
+  })
+  @ApiParam({ name: 'id', description: 'Patient MongoDB ID or GUID' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        photo: {
+          type: 'string',
+          format: 'binary',
+          description: 'Profile photo file (JPEG/PNG, max 5MB)',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Photo uploaded successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        photoUrl: { type: 'string', description: 'URL of the uploaded photo' },
+      },
+    },
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid file format or size' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Patient not found' })
+  async uploadPhoto(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ photoUrl: string }> {
+    return this.patientService.uploadPhoto(id, file);
+  }
+
+  @Delete(':id/photo')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles(UserRole.PATIENT, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Delete patient profile photo',
+    description: 'Remove the profile photo for the patient.',
+  })
+  @ApiParam({ name: 'id', description: 'Patient MongoDB ID or GUID' })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Photo deleted successfully' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Patient not found' })
+  async deletePhoto(@Param('id') id: string): Promise<void> {
+    return this.patientService.deletePhoto(id);
   }
 
   @Delete(':id')

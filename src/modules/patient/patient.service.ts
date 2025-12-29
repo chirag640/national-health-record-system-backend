@@ -1,14 +1,23 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PatientRepository } from './patient.repository';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PatientOutputDto } from './dto/patient-output.dto';
 import { PaginatedResponse, createPaginatedResponse } from '../../pagination.dto';
 import * as crypto from 'crypto';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class PatientService {
-  constructor(private readonly patientRepository: PatientRepository) {}
+  private readonly uploadDir = path.join(process.cwd(), 'uploads', 'photos');
+
+  constructor(private readonly patientRepository: PatientRepository) {
+    // Ensure upload directory exists
+    if (!fs.existsSync(this.uploadDir)) {
+      fs.mkdirSync(this.uploadDir, { recursive: true });
+    }
+  }
 
   /**
    * Generate unique GUID for patient
@@ -89,9 +98,23 @@ export class PatientService {
   }
 
   async findOne(id: string): Promise<PatientOutputDto> {
-    const item = await this.patientRepository.findById(id);
+    let item = null;
+
+    // Check if ID looks like a MongoDB ObjectId (24 hex characters)
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
+    if (isObjectId) {
+      // Try to find by MongoDB ObjectId
+      item = await this.patientRepository.findById(id);
+    }
+
+    // If not found (or ID wasn't an ObjectId), try GUID
     if (!item) {
-      throw new NotFoundException(`Patient with ID ${id} not found`);
+      item = await this.patientRepository.findByGuid(id);
+    }
+
+    if (!item) {
+      throw new NotFoundException(`Patient with ID or GUID ${id} not found`);
     }
     return this.mapToOutput(item);
   }
@@ -108,6 +131,101 @@ export class PatientService {
     const deleted = await this.patientRepository.delete(id);
     if (!deleted) {
       throw new NotFoundException(`Patient with ID ${id} not found`);
+    }
+  }
+
+  /**
+   * Upload patient profile photo
+   */
+  async uploadPhoto(id: string, file: Express.Multer.File): Promise<{ photoUrl: string }> {
+    // Find patient by ID or GUID
+    let patient = null;
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
+    if (isObjectId) {
+      patient = await this.patientRepository.findById(id);
+    }
+    if (!patient) {
+      patient = await this.patientRepository.findByGuid(id);
+    }
+    if (!patient) {
+      throw new NotFoundException(`Patient with ID or GUID ${id} not found`);
+    }
+
+    // Get actual MongoDB ID for update
+    const patientId = (patient as any)._id.toString();
+
+    // Validate file
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      throw new BadRequestException('Invalid file format. Only JPEG and PNG are allowed.');
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      throw new BadRequestException('File size exceeds 5MB limit.');
+    }
+
+    // Generate unique filename
+    const fileExt = path.extname(file.originalname);
+    const fileName = `${patientId}-${Date.now()}${fileExt}`;
+    const filePath = path.join(this.uploadDir, fileName);
+
+    // Delete old photo if exists
+    const existingPatient = patient as any;
+    if (existingPatient.photoUrl) {
+      const oldFileName = existingPatient.photoUrl.split('/').pop();
+      const oldFilePath = path.join(this.uploadDir, oldFileName);
+      if (fs.existsSync(oldFilePath)) {
+        fs.unlinkSync(oldFilePath);
+      }
+    }
+
+    // Save file
+    fs.writeFileSync(filePath, file.buffer);
+
+    // Update patient record with photo URL
+    const photoUrl = `/uploads/photos/${fileName}`;
+    await this.patientRepository.update(patientId, { photoUrl } as any);
+
+    return { photoUrl };
+  }
+
+  /**
+   * Delete patient profile photo
+   */
+  async deletePhoto(id: string): Promise<void> {
+    // Find patient by ID or GUID
+    let patient = null;
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
+    if (isObjectId) {
+      patient = await this.patientRepository.findById(id);
+    }
+    if (!patient) {
+      patient = await this.patientRepository.findByGuid(id);
+    }
+    if (!patient) {
+      throw new NotFoundException(`Patient with ID or GUID ${id} not found`);
+    }
+
+    // Get actual MongoDB ID for update
+    const patientId = (patient as any)._id.toString();
+
+    const existingPatient = patient as any;
+    if (existingPatient.photoUrl) {
+      const fileName = existingPatient.photoUrl.split('/').pop();
+      const filePath = path.join(this.uploadDir, fileName);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+
+      // Clear photo URL from patient record
+      await this.patientRepository.update(patientId, { photoUrl: null } as any);
     }
   }
 

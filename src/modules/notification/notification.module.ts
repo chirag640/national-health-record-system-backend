@@ -10,8 +10,6 @@ import {
   NotificationPreferenceSchema,
 } from './schemas/notification-preference.schema';
 import { QueueModule } from '../queue/queue.module';
-import { FirebaseService } from './services/firebase.service';
-import { SmsService } from './services/sms.service';
 
 @Module({
   imports: [
@@ -19,22 +17,20 @@ import { SmsService } from './services/sms.service';
       { name: Notification.name, schema: NotificationSchema },
       { name: NotificationPreference.name, schema: NotificationPreferenceSchema },
     ]),
-    QueueModule, // For notification delivery
+    QueueModule, // For notification delivery (also provides FirebaseService and SmsService)
   ],
   controllers: [NotificationController],
   providers: [
     NotificationService,
     NotificationRepository,
     NotificationPreferenceRepository,
-    FirebaseService,
-    SmsService,
+    // FirebaseService and SmsService are now provided by QueueModule
   ],
   exports: [
     NotificationService,
     NotificationRepository,
     NotificationPreferenceRepository,
-    FirebaseService,
-    SmsService,
+    // Re-export from QueueModule
   ],
 })
 export class NotificationModule {}

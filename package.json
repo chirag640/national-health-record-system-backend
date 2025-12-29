@@ -22,7 +22,10 @@
     "seed:force": "ts-node src/scripts/seed.ts --force",
     "worker:start": "node dist/workers/dedicated-worker.main.js",
     "worker:dev": "nodemon --watch src --exec ts-node src/workers/dedicated-worker.main.ts",
-    "worker:debug": "node --inspect=0.0.0.0:9230 dist/workers/dedicated-worker.main.js"
+    "worker:debug": "node --inspect=0.0.0.0:9230 dist/workers/dedicated-worker.main.js",
+    "postman:sync": "node scripts/swagger-to-postman.js",
+    "postman:fix": "node scripts/fix-postman-collection.js",
+    "postman:update": "npm run postman:fix && echo ✅ Postman collection updated!"
   },
   "dependencies": {
     "@aws-sdk/client-kms": "^3.682.0",
@@ -96,6 +99,7 @@
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
     "@types/jest": "^29.5.2",
+    "@types/multer": "^2.0.0",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",

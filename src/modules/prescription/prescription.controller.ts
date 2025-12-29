@@ -286,6 +286,30 @@ export class PrescriptionController {
     return this.prescriptionService.markDispensed(id, user.userId);
   }
 
+  @Post(':id/refill')
+  @Roles(UserRole.PATIENT, UserRole.DOCTOR, UserRole.HOSPITAL_ADMIN, UserRole.SUPER_ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Request a prescription refill',
+    description:
+      'Creates a new prescription as a refill of an existing one. Patients can request refills, which require doctor approval.',
+  })
+  @ApiParam({ name: 'id', description: 'Prescription MongoDB ID to refill' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Refill request created successfully',
+    type: PrescriptionOutputDto,
+  })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Cannot refill this prescription' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Prescription not found' })
+  async requestRefill(
+    @Param('id') id: string,
+    @Body() body: { notes?: string },
+    @CurrentUser() user: UserPayload,
+  ) {
+    return this.prescriptionService.requestRefill(id, user.userId, user.role, body.notes);
+  }
+
   @Delete(':id')
   @Roles(UserRole.DOCTOR, UserRole.SUPER_ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)

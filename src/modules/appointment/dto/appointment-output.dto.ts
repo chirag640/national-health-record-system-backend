@@ -166,4 +166,38 @@ export class AppointmentOutputDto {
     example: '2025-12-01T10:00:00.000Z',
   })
   updatedAt!: Date;
+
+  @ApiProperty({
+    description: 'Populated doctor information',
+    example: {
+      id: '507f1f77bcf86cd799439011',
+      name: 'Dr. John Smith',
+      specialty: 'General Medicine',
+      phone: '+919876543210',
+    },
+    required: false,
+  })
+  doctor?: {
+    id: string;
+    name: string;
+    specialty?: string;
+    phone?: string;
+  };
+
+  @ApiProperty({
+    description: 'Populated hospital information',
+    example: {
+      id: '507f1f77bcf86cd799439011',
+      name: 'City General Hospital',
+      state: 'Maharashtra',
+      district: 'Mumbai',
+    },
+    required: false,
+  })
+  hospital?: {
+    id: string;
+    name: string;
+    state?: string;
+    district?: string;
+  };
 }

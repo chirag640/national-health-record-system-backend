@@ -407,6 +407,84 @@ export class PrescriptionService {
   }
 
   /**
+   * Request a prescription refill
+   * Creates a new prescription based on an existing one
+   */
+  async requestRefill(
+    originalId: string,
+    userId: string,
+    userRole: string,
+    notes?: string,
+  ): Promise<PrescriptionDocument> {
+    const original = await this.findOne(originalId);
+
+    // Validate original prescription can be refilled
+    if (![PrescriptionStatus.ACTIVE, PrescriptionStatus.COMPLETED].includes(original.status)) {
+      throw new BadRequestException('Only active or completed prescriptions can be refilled');
+    }
+
+    // Check if refills are allowed for this prescription
+    const refillsAllowed = original.dispenseRequest?.numberOfRepeatsAllowed || 0;
+    if (refillsAllowed === 0) {
+      throw new BadRequestException('This prescription does not allow refills');
+    }
+
+    // Controlled substances have stricter refill requirements
+    if (original.isControlledSubstance) {
+      // Only doctors can refill controlled substances
+      if (userRole !== 'Doctor' && userRole !== 'SuperAdmin') {
+        throw new BadRequestException('Controlled substance refills require doctor authorization');
+      }
+    }
+
+    // Generate new prescription number
+    const prescriptionNumber = await this.generatePrescriptionNumber();
+
+    // Create refill prescription
+    const now = new Date();
+    const effectivePeriodDays = original.dispenseRequest?.expectedSupplyDurationValue || 30;
+    const effectivePeriodEnd = new Date(now);
+    effectivePeriodEnd.setDate(effectivePeriodEnd.getDate() + effectivePeriodDays);
+
+    const refillData: any = {
+      prescriptionNumber,
+      patient: original.patient,
+      prescriber: original.prescriber,
+      encounter: original.encounter,
+      status: userRole === 'Patient' ? PrescriptionStatus.DRAFT : PrescriptionStatus.ACTIVE,
+      intent: original.intent,
+      priority: original.priority,
+      medicationName: original.medicationName,
+      medicationCode: original.medicationCode,
+      authoredOn: now,
+      effectivePeriodStart: now,
+      effectivePeriodEnd: effectivePeriodEnd,
+      dosageInstruction: original.dosageInstruction,
+      dispenseRequest: {
+        ...original.dispenseRequest,
+        validityPeriodStart: now,
+        validityPeriodEnd: effectivePeriodEnd,
+      },
+      reasonCode: original.reasonCode,
+      reasonReference: original.reasonReference,
+      isControlledSubstance: original.isControlledSubstance,
+      organization: original.organization,
+      patientNotes: notes
+        ? `Refill of ${original.prescriptionNumber}. ${notes}`
+        : `Refill of ${original.prescriptionNumber}`,
+      priorPrescription: new Types.ObjectId(originalId),
+    };
+
+    const refill = await this.prescriptionRepository.create(refillData);
+
+    this.logger.log(
+      `Prescription refill ${refill.prescriptionNumber} created for original ${original.prescriptionNumber} by user ${userId}`,
+    );
+
+    return refill;
+  }
+
+  /**
    * Soft delete a prescription
    */
   async remove(id: string, userId: string): Promise<void> {

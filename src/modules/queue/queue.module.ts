@@ -5,6 +5,10 @@ import { BullBoardModule } from '@bull-board/nestjs';
 import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { EmailModule } from '../../email/email.module';
+import * as dotenv from 'dotenv';
+
+// Load .env file early to ensure Redis config is available
+dotenv.config();
 
 // Queue Names
 export const QUEUE_NAMES = {
@@ -31,6 +35,10 @@ import { CleanupProducer } from './producers/cleanup.producer';
 
 // Queue Configuration
 import { QueueConfigService } from './queue.config';
+
+// Firebase and SMS services for notification processing
+import { FirebaseService } from '../notification/services/firebase.service';
+import { SmsService } from '../notification/services/sms.service';
 
 // Check if Redis is configured
 const isRedisConfigured = !!(
@@ -167,6 +175,10 @@ if (!isRedisConfigured) {
     // Configuration Service
     QueueConfigService,
 
+    // Firebase and SMS services needed by NotificationProcessor
+    FirebaseService,
+    SmsService,
+
     // Conditionally provide processors and producers only if Redis is configured
     ...(isRedisConfigured
       ? [
@@ -188,6 +200,8 @@ if (!isRedisConfigured) {
   ],
   exports: [
     QueueConfigService,
+    FirebaseService,
+    SmsService,
     ...(isRedisConfigured
       ? [
           BullModule,
